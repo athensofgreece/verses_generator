@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADHD-Friendly Bible Verse Generator</title>
+    <link rel="stylesheet" href="bible_verses.css"> <!-- Link to external CSS file -->
+</head>
+<body>
+    <div class="container">
+        <h1>Bible Verses for ADHD</h1>
+        
+        <div class="filter-controls">
+            <button class="filter-button active" data-category="all">All Verses</button>
+            <button class="filter-button" data-category="focus">Focus & Attention</button>
+            <button class="filter-button" data-category="overwhelm">When Overwhelmed</button>
+            <button class="filter-button" data-category="strength">Strength & Energy</button>
+            <button class="filter-button" data-category="peace">Peace of Mind</button>
+            <button class="filter-button" data-category="purpose">Purpose & Direction</button>
+        </div>
+        
+        <div class="verse-box">
+            <div class="category" id="verse-category">All Verses</div>
+            <div class="verse-text" id="verse-text">Click the button below to generate a Bible verse.</div>
+            <div class="verse-reference" id="verse-reference"></div>
+        </div>
+        
+        <button id="generate-button">New Verse</button>
+    </div>
+
+    <script src="bible_verses.js"></script> <!-- Link to external JavaScript file -->
+</body>
+</html>
