@@ -1535,11 +1535,15 @@
         
         let journal = loadJournal();
         
+        let journalStored = true;
+        
         function saveJournal() {
             try {
                 localStorage.setItem(JOURNAL_KEY, JSON.stringify(journal));
+                journalStored = true;
             } catch (error) {
                 // Storage unavailable: notes last for this visit only
+                journalStored = false;
             }
         }
         
@@ -1595,6 +1599,10 @@
         function deleteJournalEntry(verse) {
             if (!window.confirm('Delete this note? This can\u2019t be undone.')) {
                 return false;
+            }
+            // Other tabs may have saved while the confirm box was open
+            if (journalStored) {
+                journal = loadJournal();
             }
             journal = journal.filter(entry => verseKey(entry) !== verseKey(verse));
             saveJournal();
