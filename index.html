@@ -37,46 +37,50 @@
             <button type="button" class="tab-button" id="tab-favorites" data-view="favorites" aria-pressed="false">Favorites (<span id="favorites-count">0</span>)</button>
         </nav>
         
-        <main id="view-home">
-            <section class="daily-card" aria-labelledby="daily-heading">
-                <div class="daily-header">
-                    <h2 id="daily-heading" class="daily-label">Verse of the day</h2>
-                    <span class="daily-date" id="daily-date"></span>
-                </div>
-                <div class="verse-text" id="daily-text"></div>
-                <div class="verse-reference" id="daily-reference"></div>
-                <div class="verse-actions" data-target="daily">
-                    <button type="button" class="action-button" data-action="favorite" aria-pressed="false">&#9734; Save</button>
-                    <button type="button" class="action-button" data-action="copy">Copy</button>
-                    <button type="button" class="action-button" data-action="share">Share</button>
-                </div>
-            </section>
+        <main id="view-home" class="home-layout">
+            <div class="home-side">
+                <section class="daily-card" aria-labelledby="daily-heading">
+                    <div class="daily-header">
+                        <h2 id="daily-heading" class="daily-label">Verse of the day</h2>
+                        <span class="daily-date" id="daily-date"></span>
+                    </div>
+                    <div class="verse-text" id="daily-text"></div>
+                    <div class="verse-reference" id="daily-reference"></div>
+                    <div class="verse-actions" data-target="daily">
+                        <button type="button" class="action-button" data-action="favorite" aria-pressed="false">&#9734; Save</button>
+                        <button type="button" class="action-button" data-action="copy">Copy</button>
+                        <button type="button" class="action-button" data-action="share">Share</button>
+                    </div>
+                </section>
+            </div>
             
-            <section class="mood-section" aria-labelledby="mood-heading">
-                <h2 id="mood-heading" class="section-title">How are you feeling?</h2>
-                <div class="mood-grid" role="group" aria-labelledby="mood-heading">
-                    <button type="button" class="mood-button" data-mood="distracted" aria-pressed="false">Distracted</button>
-                    <button type="button" class="mood-button" data-mood="anxious" aria-pressed="false">Anxious</button>
-                    <button type="button" class="mood-button" data-mood="overwhelmed" aria-pressed="false">Overwhelmed</button>
-                    <button type="button" class="mood-button" data-mood="strength" aria-pressed="false">Need Strength</button>
-                    <button type="button" class="mood-button" data-mood="hope" aria-pressed="false">Need Hope</button>
-                    <button type="button" class="mood-button" data-mood="direction" aria-pressed="false">Need Direction</button>
-                    <button type="button" class="mood-button mood-any active" data-mood="all" aria-pressed="true">Any verse</button>
-                </div>
-            </section>
+            <div class="home-main">
+                <section class="mood-section" aria-labelledby="mood-heading">
+                    <h2 id="mood-heading" class="section-title">How are you feeling?</h2>
+                    <div class="mood-grid" role="group" aria-labelledby="mood-heading">
+                        <button type="button" class="mood-button" data-mood="distracted" aria-pressed="false">Distracted</button>
+                        <button type="button" class="mood-button" data-mood="anxious" aria-pressed="false">Anxious</button>
+                        <button type="button" class="mood-button" data-mood="overwhelmed" aria-pressed="false">Overwhelmed</button>
+                        <button type="button" class="mood-button" data-mood="strength" aria-pressed="false">Need Strength</button>
+                        <button type="button" class="mood-button" data-mood="hope" aria-pressed="false">Need Hope</button>
+                        <button type="button" class="mood-button" data-mood="direction" aria-pressed="false">Need Direction</button>
+                        <button type="button" class="mood-button mood-any active" data-mood="all" aria-pressed="true">Any verse</button>
+                    </div>
+                </section>
             
-            <div class="verse-box">
-                <div class="category" id="verse-category">Any verse</div>
-                <div class="verse-text" id="verse-text">Click the button below to generate a Bible verse.</div>
-                <div class="verse-reference" id="verse-reference"></div>
-                <div class="verse-actions" data-target="random">
-                    <button type="button" class="action-button" data-action="favorite" aria-pressed="false">&#9734; Save</button>
-                    <button type="button" class="action-button" data-action="copy">Copy</button>
-                    <button type="button" class="action-button" data-action="share">Share</button>
-                </div>
+                <div class="verse-box">
+                    <div class="category" id="verse-category">Any verse</div>
+                    <div class="verse-text" id="verse-text">Click the button below to generate a Bible verse.</div>
+                    <div class="verse-reference" id="verse-reference"></div>
+                    <div class="verse-actions" data-target="random">
+                        <button type="button" class="action-button" data-action="favorite" aria-pressed="false">&#9734; Save</button>
+                        <button type="button" class="action-button" data-action="copy">Copy</button>
+                        <button type="button" class="action-button" data-action="share">Share</button>
+                    </div>
             </div>
             
             <button type="button" id="generate-button">New Verse</button>
+            </div>
         </main>
         
         <section id="view-favorites" aria-label="Favorite verses" hidden>
