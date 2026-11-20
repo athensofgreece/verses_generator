@@ -1,6 +1,7 @@
 // Offline support: keeps a copy of the app so it opens without a connection.
 // Bump CACHE_NAME whenever the list of files below changes.
-const CACHE_NAME = 'verses-v1';
+const CACHE_PREFIX = 'verses-';
+const CACHE_NAME = CACHE_PREFIX + 'v1';
 const APP_FILES = [
     './',
     './index.html',
@@ -26,7 +27,9 @@ self.addEventListener('activate', event => {
     event.waitUntil(
         caches.keys()
             .then(names => Promise.all(
-                names.filter(name => name !== CACHE_NAME).map(name => caches.delete(name))
+                // Other GitHub Pages sites share this origin, so only remove our own old caches
+                names.filter(name => name.startsWith(CACHE_PREFIX) && name !== CACHE_NAME)
+                    .map(name => caches.delete(name))
             ))
             .then(() => self.clients.claim())
     );
