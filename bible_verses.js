@@ -604,6 +604,9 @@
         
         // Generate a random verse for the selected mood
         function generateVerse() {
+            if (speakingButton && verseBox.contains(speakingButton)) {
+                stopSpeaking();
+            }
             const selectedVerse = pickRandomVerse(versesForMood(currentMood), currentVerse);
             currentVerse = selectedVerse;
             
@@ -766,6 +769,9 @@
             button.className = 'action-button';
             button.dataset.action = action;
             button.textContent = label;
+            if (action === 'listen') {
+                button.setAttribute('aria-pressed', 'false');
+            }
             return button;
         }
         
@@ -787,6 +793,7 @@
             actions.append(
                 createActionButton('copy', 'Copy'),
                 createActionButton('share', 'Share'),
+                createActionButton('listen', '\u25B6 Listen'),
                 createActionButton('remove', 'Remove')
             );
             
@@ -885,6 +892,57 @@
             showToast(copied ? 'Sharing isn\u2019t available here, so the verse was copied' : 'Could not share or copy this verse.');
         }
         
+        // ---- Read aloud ----
+        const canSpeak = Boolean(window.speechSynthesis && window.SpeechSynthesisUtterance);
+        let speakingButton = null;
+        
+        if (!canSpeak) {
+            document.documentElement.classList.add('no-speech');
+        }
+        
+        // "Psalm 34:4" reads as "Psalm chapter 34, verse 4" instead of a time
+        function spokenReference(reference) {
+            return reference.replace(/(\d+):(\d+)(?:-(\d+))?/, (match, chapter, first, last) =>
+                'chapter ' + chapter + ', ' + (last ? 'verses ' + first + ' to ' + last : 'verse ' + first)
+            );
+        }
+        
+        function resetListenButton() {
+            if (speakingButton) {
+                speakingButton.textContent = '\u25B6 Listen';
+                speakingButton.setAttribute('aria-pressed', 'false');
+                speakingButton = null;
+            }
+        }
+        
+        function stopSpeaking() {
+            if (canSpeak) {
+                window.speechSynthesis.cancel();
+            }
+            resetListenButton();
+        }
+        
+        // Tapping Listen again (now "Stop") stops reading
+        function speakVerse(verse, button) {
+            const wasSpeaking = speakingButton === button;
+            stopSpeaking();
+            if (wasSpeaking || !canSpeak) {
+                return;
+            }
+            const utterance = new SpeechSynthesisUtterance(verse.text + ' ' + spokenReference(verse.reference));
+            utterance.lang = 'en-US';
+            utterance.rate = 0.9;
+            utterance.onend = utterance.onerror = () => {
+                if (speakingButton === button) {
+                    resetListenButton();
+                }
+            };
+            speakingButton = button;
+            button.textContent = '\u25A0 Stop';
+            button.setAttribute('aria-pressed', 'true');
+            window.speechSynthesis.speak(utterance);
+        }
+        
         // One listener handles every verse action button, including ones added later
         document.addEventListener('click', event => {
             const button = event.target.closest('[data-action]');
@@ -902,6 +960,8 @@
                 copyVerse(verse);
             } else if (action === 'share') {
                 shareVerse(verse);
+            } else if (action === 'listen') {
+                speakVerse(verse, button);
             }
         });
         
