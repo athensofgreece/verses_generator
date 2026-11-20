@@ -1445,7 +1445,6 @@
         
         // Finishing a pause or saving a note also counts as today's check-in
         function checkIn() {
-            checkins = loadCheckins();
             if (!isCheckedIn(new Date())) {
                 checkins.push(localDateKey(new Date()));
                 saveCheckins();
@@ -1455,7 +1454,7 @@
         
         function undoCheckIn() {
             const today = localDateKey(new Date());
-            checkins = loadCheckins().filter(day => day !== today);
+            checkins = checkins.filter(day => day !== today);
             saveCheckins();
             renderCheckins();
         }
@@ -1576,7 +1575,7 @@
             const verse = journalVerse;
             const note = journalNote.value.trim();
             journalVerse = null;
-            journal = loadJournal().filter(entry => verseKey(entry) !== verseKey(verse));
+            journal = journal.filter(entry => verseKey(entry) !== verseKey(verse));
             if (note) {
                 journal.unshift(Object.assign({}, verse, {
                     note: note,
@@ -1596,7 +1595,7 @@
             if (!window.confirm('Delete this note? This can\u2019t be undone.')) {
                 return false;
             }
-            journal = loadJournal().filter(entry => verseKey(entry) !== verseKey(verse));
+            journal = journal.filter(entry => verseKey(entry) !== verseKey(verse));
             saveJournal();
             renderJournal();
             showToast('Note deleted');
