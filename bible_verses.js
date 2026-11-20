@@ -524,6 +524,189 @@
                 text: "Commit your way to the LORD, trust also in Him, and He shall bring it to pass.",
                 reference: "Psalm 37:5",
                 category: "purpose"
+            },
+            
+            // Added in Phase 2: Contemporary English Version (CEV), labeled in the app.
+            // CEV © 1991, 1992, 1995 American Bible Society; credit line is in index.html.
+            // Hope (CEV)
+            {
+                text: "I pray that God, who gives hope, will bless you with complete happiness and peace because of your faith. And may the power of the Holy Spirit fill you with hope.",
+                reference: "Romans 15:13",
+                category: "hope",
+                translation: "CEV"
+            },
+            {
+                text: "Only God gives inward peace, and I depend on him.",
+                reference: "Psalm 62:5",
+                category: "hope",
+                translation: "CEV"
+            },
+            {
+                text: "We must hold tightly to the hope we say is ours. After all, we can trust the one who made the agreement with us.",
+                reference: "Hebrews 10:23",
+                category: "hope",
+                translation: "CEV"
+            },
+            {
+                text: "All who trust the LORD, be cheerful and strong.",
+                reference: "Psalm 31:24",
+                category: "hope",
+                translation: "CEV"
+            },
+            {
+                text: "However, we hope for something we have not yet seen, and we patiently wait for it.",
+                reference: "Romans 8:25",
+                category: "hope",
+                translation: "CEV"
+            },
+            {
+                text: "With all my heart, I am waiting, LORD, for you! I trust your promises.",
+                reference: "Psalm 130:5",
+                category: "hope",
+                translation: "CEV"
+            },
+            {
+                text: "But I trust the LORD God to save me, and I will wait for him to answer my prayer.",
+                reference: "Micah 7:7",
+                category: "hope",
+                translation: "CEV"
+            },
+            {
+                text: "Then you will truly have hope for the future.",
+                reference: "Proverbs 23:18",
+                category: "hope",
+                translation: "CEV"
+            },
+            {
+                text: "But I will bless those who trust me, the LORD.",
+                reference: "Jeremiah 17:7",
+                category: "hope",
+                translation: "CEV"
+            },
+            {
+                text: "The LORD God of Jacob blesses everyone who trusts him and depends on him.",
+                reference: "Psalm 146:5",
+                category: "hope",
+                translation: "CEV"
+            },
+            {
+                text: "Praise God, the Father of our Lord Jesus Christ. God is so good, and by raising Jesus from death, he has given us new life and a hope that lives on.",
+                reference: "1 Peter 1:3",
+                category: "hope",
+                translation: "CEV"
+            },
+            {
+                text: "This hope is like a firm and steady anchor for our souls. In fact, hope reaches behind the curtain and into the most holy place.",
+                reference: "Hebrews 6:19",
+                category: "hope",
+                translation: "CEV"
+            },
+            {
+                text: "Let your hope make you glad. Be patient in time of trouble and never stop praying.",
+                reference: "Romans 12:12",
+                category: "hope",
+                translation: "CEV"
+            },
+            {
+                text: "I will never give up hope or stop praising you.",
+                reference: "Psalm 71:14",
+                category: "hope",
+                translation: "CEV"
+            },
+            {
+                text: "He will wipe all tears from their eyes, and there will be no more death, suffering, crying, or pain. These things of the past are gone forever.",
+                reference: "Revelation 21:4",
+                category: "hope",
+                translation: "CEV"
+            },
+            // When Overwhelmed (CEV)
+            {
+                text: "We often suffer, but we are never crushed. Even when we don't know what to do, we never give up. In times of trouble, God is with us, and when we are knocked down, we get up again.",
+                reference: "2 Corinthians 4:8-9",
+                category: "overwhelm",
+                translation: "CEV"
+            },
+            {
+                text: "When you cross deep rivers, I will be with you, and you won't drown. When you walk through fire, you won't be burned or scorched by the flames.",
+                reference: "Isaiah 43:2",
+                category: "overwhelm",
+                translation: "CEV"
+            },
+            {
+                text: "I was in terrible trouble when I called out to you, but from your temple you heard me and answered my prayer.",
+                reference: "Psalm 18:6",
+                category: "overwhelm",
+                translation: "CEV"
+            },
+            // Strength & Energy (CEV)
+            {
+                text: "The LORD gives strength to those who are weary.",
+                reference: "Isaiah 40:29",
+                category: "strength",
+                translation: "CEV"
+            },
+            {
+                text: "Finally, let the mighty strength of the Lord make you strong.",
+                reference: "Ephesians 6:10",
+                category: "strength",
+                translation: "CEV"
+            },
+            {
+                text: "We never give up. Our bodies are gradually dying, but we ourselves are being made stronger each day.",
+                reference: "2 Corinthians 4:16",
+                category: "strength",
+                translation: "CEV"
+            },
+            // Peace of Mind (CEV)
+            {
+                text: "I pray that the Lord, who gives peace, will always bless you with peace. May the Lord be with all of you.",
+                reference: "2 Thessalonians 3:16",
+                category: "peace",
+                translation: "CEV"
+            },
+            {
+                text: "I may walk through valleys as dark as death, but I won't be afraid. You are with me, and your shepherd's rod makes me feel safe.",
+                reference: "Psalm 23:4",
+                category: "peace",
+                translation: "CEV"
+            },
+            // Focus & Attention (CEV)
+            {
+                text: "Teach me to follow you, and I will obey your truth. Always keep me faithful.",
+                reference: "Psalm 86:11",
+                category: "focus",
+                translation: "CEV"
+            },
+            {
+                text: "The Lord answered, “Martha, Martha! You are worried and upset about so many things, but only one thing is necessary. Mary has chosen what is best, and it will not be taken away from her.”",
+                reference: "Luke 10:41-42",
+                category: "focus",
+                translation: "CEV"
+            },
+            {
+                text: "Teach us to use wisely all the time we have.",
+                reference: "Psalm 90:12",
+                category: "focus",
+                translation: "CEV"
+            },
+            // Purpose & Direction (CEV)
+            {
+                text: "Your word is a lamp that gives light wherever I walk.",
+                reference: "Psalm 119:105",
+                category: "purpose",
+                translation: "CEV"
+            },
+            {
+                text: "The LORD will always guide you and provide good things to eat when you are in the desert. He will make you healthy. You will be like a garden that has plenty of water or like a stream that never runs dry.",
+                reference: "Isaiah 58:11",
+                category: "purpose",
+                translation: "CEV"
+            },
+            {
+                text: "Each morning let me learn more about your love because I trust you. I come to you in prayer, asking for your guidance.",
+                reference: "Psalm 143:8",
+                category: "purpose",
+                translation: "CEV"
             }
         ];
 
@@ -533,8 +716,14 @@
             'overwhelm': 'When Overwhelmed',
             'strength': 'Strength & Energy',
             'peace': 'Peace of Mind',
-            'purpose': 'Purpose & Direction'
+            'purpose': 'Purpose & Direction',
+            'hope': 'Hope'
         };
+        
+        // Reference as shown and copied, with the translation for non-NKJV verses
+        function displayReference(verse) {
+            return verse.translation ? verse.reference + ' (' + verse.translation + ')' : verse.reference;
+        }
         
         // Skip incomplete entries (e.g. empty placeholders) without changing the data above
         const usableVerses = verses.filter(verse =>
@@ -555,6 +744,7 @@
             strength: { label: 'Need Strength', categories: ['strength'] },
             hope: {
                 label: 'Need Hope',
+                categories: ['hope'],
                 references: [
                     'Jeremiah 29:11', 'Isaiah 40:31', 'Lamentations 3:22-23', 'Psalm 42:5',
                     'Romans 8:28', 'Isaiah 43:18-19', 'Psalm 73:26', 'John 16:33',
@@ -612,7 +802,7 @@
             
             // Update the display
             verseText.textContent = selectedVerse.text;
-            verseReference.textContent = selectedVerse.reference;
+            verseReference.textContent = displayReference(selectedVerse);
             verseCategory.textContent = currentMood === 'all'
                 ? categoryDisplayNames[selectedVerse.category] || selectedVerse.category
                 : moods[currentMood].label;
@@ -673,7 +863,7 @@
             dailyDayNumber = dayNumber;
             dailyVerse = verseForDay(dayNumber);
             dailyText.textContent = dailyVerse.text;
-            dailyReference.textContent = dailyVerse.reference;
+            dailyReference.textContent = displayReference(dailyVerse);
             dailyDate.textContent = now.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
             updateFavoriteButtons();
             renderCheckins();
@@ -739,7 +929,7 @@
             if (isFavorite(verse)) {
                 favorites = favorites.filter(saved => verseKey(saved) !== verseKey(verse));
             } else {
-                favorites.unshift({ text: verse.text, reference: verse.reference, category: verse.category });
+                favorites.unshift({ text: verse.text, reference: verse.reference, category: verse.category, translation: verse.translation });
             }
             saveFavorites();
             renderFavorites();
@@ -790,7 +980,7 @@
             
             const reference = document.createElement('div');
             reference.className = 'verse-reference';
-            reference.textContent = verse.reference;
+            reference.textContent = displayReference(verse);
             
             const actions = document.createElement('div');
             actions.className = 'verse-actions';
@@ -857,7 +1047,7 @@
         }
         
         function formatVerse(verse) {
-            return '"' + verse.text + '" \u2014 ' + verse.reference;
+            return '"' + verse.text + '" \u2014 ' + displayReference(verse);
         }
         
         async function copyText(text) {
@@ -894,7 +1084,7 @@
         async function shareVerse(verse) {
             if (navigator.share) {
                 try {
-                    await navigator.share({ title: verse.reference, text: formatVerse(verse), url: window.location.href });
+                    await navigator.share({ title: displayReference(verse), text: formatVerse(verse), url: window.location.href });
                     return;
                 } catch (error) {
                     if (error.name === 'AbortError') {
@@ -1181,7 +1371,7 @@
         function startPause(minutes) {
             const verse = currentVerse || dailyVerse;
             document.getElementById('pause-text').textContent = verse.text;
-            document.getElementById('pause-reference').textContent = verse.reference;
+            document.getElementById('pause-reference').textContent = displayReference(verse);
             pauseDialog.classList.remove('finished');
             pauseStop.textContent = 'End pause';
             pauseStartedAt = Date.now();
@@ -1368,9 +1558,9 @@
         
         function openJournal(verse) {
             const entry = journalEntryFor(verse);
-            journalVerse = { text: verse.text, reference: verse.reference, category: verse.category };
+            journalVerse = { text: verse.text, reference: verse.reference, category: verse.category, translation: verse.translation };
             document.getElementById('journal-verse-text').textContent = verse.text;
-            document.getElementById('journal-verse-reference').textContent = verse.reference;
+            document.getElementById('journal-verse-reference').textContent = displayReference(verse);
             journalPrompt.textContent = entry ? entry.prompt : promptFor(verse);
             journalNote.value = entry ? entry.note : '';
             journalDelete.hidden = !entry;
@@ -1440,7 +1630,7 @@
             
             const reference = document.createElement('div');
             reference.className = 'verse-reference';
-            reference.textContent = entry.reference;
+            reference.textContent = displayReference(entry);
             
             const prompt = document.createElement('p');
             prompt.className = 'journal-item-prompt';
