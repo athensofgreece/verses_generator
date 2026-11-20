@@ -1250,8 +1250,9 @@
         function closeDialog(dialog) {
             if (typeof dialog.close === 'function') {
                 dialog.close();
-            } else {
+            } else if (dialog.hasAttribute('open')) {
                 dialog.removeAttribute('open');
+                dialog.dispatchEvent(new Event('close'));
             }
         }
         
