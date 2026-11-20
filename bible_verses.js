@@ -778,7 +778,11 @@
             const actions = document.createElement('div');
             actions.className = 'verse-actions';
             actions.dataset.key = verseKey(verse);
-            actions.append(createActionButton('remove', 'Remove'));
+            actions.append(
+                createActionButton('copy', 'Copy'),
+                createActionButton('share', 'Share'),
+                createActionButton('remove', 'Remove')
+            );
             
             item.append(text, reference, actions);
             return item;
@@ -806,6 +810,67 @@
             button.addEventListener('click', () => showView(button.dataset.view));
         });
         
+        // ---- Copy & share ----
+        const toast = document.getElementById('toast');
+        let toastTimer = null;
+        
+        function showToast(message) {
+            toast.textContent = message;
+            toast.classList.add('visible');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.remove('visible'), 2500);
+        }
+        
+        function formatVerse(verse) {
+            return '"' + verse.text + '" \u2014 ' + verse.reference;
+        }
+        
+        async function copyText(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    return true;
+                } catch (error) {
+                    // Fall through to the legacy method below
+                }
+            }
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.setAttribute('readonly', '');
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            let copied = false;
+            try {
+                copied = document.execCommand('copy');
+            } catch (error) {
+                copied = false;
+            }
+            textarea.remove();
+            return copied;
+        }
+        
+        async function copyVerse(verse) {
+            const copied = await copyText(formatVerse(verse));
+            showToast(copied ? 'Verse copied' : 'Could not copy. Please select the text instead.');
+        }
+        
+        async function shareVerse(verse) {
+            if (navigator.share) {
+                try {
+                    await navigator.share({ title: verse.reference, text: formatVerse(verse), url: window.location.href });
+                    return;
+                } catch (error) {
+                    if (error.name === 'AbortError') {
+                        return; // The user closed the share sheet
+                    }
+                }
+            }
+            const copied = await copyText(formatVerse(verse));
+            showToast(copied ? 'Sharing isn\u2019t available here, so the verse was copied' : 'Could not share or copy this verse.');
+        }
+        
         // One listener handles every verse action button, including ones added later
         document.addEventListener('click', event => {
             const button = event.target.closest('[data-action]');
@@ -819,6 +884,10 @@
             const action = button.dataset.action;
             if (action === 'favorite' || action === 'remove') {
                 toggleFavorite(verse);
+            } else if (action === 'copy') {
+                copyVerse(verse);
+            } else if (action === 'share') {
+                shareVerse(verse);
             }
         });
         

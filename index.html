@@ -25,6 +25,8 @@
                 <div class="verse-reference" id="daily-reference"></div>
                 <div class="verse-actions" data-target="daily">
                     <button type="button" class="action-button" data-action="favorite" aria-pressed="false">&#9734; Save</button>
+                    <button type="button" class="action-button" data-action="copy">Copy</button>
+                    <button type="button" class="action-button" data-action="share">Share</button>
                 </div>
             </section>
             
@@ -47,6 +49,8 @@
                 <div class="verse-reference" id="verse-reference"></div>
                 <div class="verse-actions" data-target="random">
                     <button type="button" class="action-button" data-action="favorite" aria-pressed="false">&#9734; Save</button>
+                    <button type="button" class="action-button" data-action="copy">Copy</button>
+                    <button type="button" class="action-button" data-action="share">Share</button>
                 </div>
             </div>
             
@@ -58,6 +62,8 @@
             <ul class="favorites-list" id="favorites-list"></ul>
         </section>
     </div>
+    
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
     <script src="bible_verses.js"></script> <!-- Link to external JavaScript file -->
 </body>

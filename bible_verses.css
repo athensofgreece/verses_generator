@@ -233,3 +233,25 @@ html, body {
             color: #7f8c8d;
             padding: 24px 0;
         }
+        
+        .toast {
+            position: fixed;
+            left: 50%;
+            bottom: 24px;
+            transform: translate(-50%, 20px);
+            max-width: calc(100% - 32px);
+            background-color: #2c3e50;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 15px;
+            text-align: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+        
+        .toast.visible {
+            opacity: 1;
+            transform: translate(-50%, 0);
+        }
