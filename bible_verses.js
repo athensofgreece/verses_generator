@@ -676,6 +676,7 @@
             dailyReference.textContent = dailyVerse.reference;
             dailyDate.textContent = now.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
             updateFavoriteButtons();
+            renderCheckins();
         }
         
         // Refresh the daily verse after midnight, including when a tab is reopened
@@ -833,6 +834,10 @@
             if (event.key === FAVORITES_KEY || event.key === null) {
                 favorites = loadFavorites();
                 renderFavorites();
+            }
+            if (event.key === CHECKINS_KEY || event.key === null) {
+                checkins = loadCheckins();
+                renderCheckins();
             }
             if (event.key === JOURNAL_KEY || event.key === null) {
                 journal = loadJournal();
@@ -1158,6 +1163,7 @@
             breathCue.textContent = 'Well done. Take this peace with you.';
             pauseDialog.classList.add('finished');
             pauseStop.textContent = 'Close';
+            checkIn();
         }
         
         function updatePause() {
@@ -1193,6 +1199,118 @@
         
         pauseStop.addEventListener('click', () => closeDialog(pauseDialog));
         pauseDialog.addEventListener('close', stopPauseTimer);
+        
+        // ---- Gentle daily check-in ----
+        const CHECKINS_KEY = 'versesGenerator.checkins';
+        const CHECKIN_HISTORY_DAYS = 14;
+        const checkinButton = document.getElementById('checkin-button');
+        const checkinMessage = document.getElementById('checkin-message');
+        const checkinSummary = document.getElementById('checkin-summary');
+        const checkinDays = document.getElementById('checkin-days');
+        
+        function localDateKey(date) {
+            return date.getFullYear() + '-' +
+                String(date.getMonth() + 1).padStart(2, '0') + '-' +
+                String(date.getDate()).padStart(2, '0');
+        }
+        
+        function daysAgo(count) {
+            const now = new Date();
+            return new Date(now.getFullYear(), now.getMonth(), now.getDate() - count);
+        }
+        
+        function loadCheckins() {
+            try {
+                const saved = JSON.parse(localStorage.getItem(CHECKINS_KEY));
+                return Array.isArray(saved)
+                    ? saved.filter(day => typeof day === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(day))
+                    : [];
+            } catch (error) {
+                return [];
+            }
+        }
+        
+        let checkins = loadCheckins();
+        
+        function saveCheckins() {
+            checkins = Array.from(new Set(checkins)).sort().slice(-400);
+            try {
+                localStorage.setItem(CHECKINS_KEY, JSON.stringify(checkins));
+            } catch (error) {
+                // Storage unavailable: check-ins last for this visit only
+            }
+        }
+        
+        function isCheckedIn(date) {
+            return checkins.includes(localDateKey(date));
+        }
+        
+        function currentRun() {
+            let run = 0;
+            while (isCheckedIn(daysAgo(run))) {
+                run++;
+            }
+            return run;
+        }
+        
+        // Finishing a pause or saving a note also counts as today's check-in
+        function checkIn() {
+            checkins = loadCheckins();
+            if (!isCheckedIn(new Date())) {
+                checkins.push(localDateKey(new Date()));
+                saveCheckins();
+            }
+            renderCheckins();
+        }
+        
+        function undoCheckIn() {
+            const today = localDateKey(new Date());
+            checkins = loadCheckins().filter(day => day !== today);
+            saveCheckins();
+            renderCheckins();
+        }
+        
+        // Only ever celebrates what was done; missed days are never counted or mentioned
+        function renderCheckins() {
+            const checkedToday = isCheckedIn(new Date());
+            const run = currentRun();
+            
+            checkinButton.setAttribute('aria-pressed', String(checkedToday));
+            checkinButton.textContent = checkedToday ? '\u2713 Checked in today' : 'Check in for today';
+            if (!checkedToday) {
+                checkinMessage.textContent = 'Spent a moment with God today? Mark it here.';
+            } else if (run > 1) {
+                checkinMessage.textContent = run + ' days in a row. Lovely.';
+            } else {
+                checkinMessage.textContent = 'Checked in for today. See you tomorrow.';
+            }
+            checkinSummary.textContent = checkins.length
+                ? checkins.length + (checkins.length === 1 ? ' day' : ' days') + ' so far'
+                : '';
+            
+            const days = [];
+            for (let count = CHECKIN_HISTORY_DAYS - 1; count >= 0; count--) {
+                const date = daysAgo(count);
+                const done = isCheckedIn(date);
+                const day = document.createElement('li');
+                day.className = 'checkin-day' + (done ? ' done' : '') + (count === 0 ? ' today' : '');
+                day.textContent = date.getDate();
+                day.title = date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }) +
+                    (done ? ': checked in' : '');
+                day.setAttribute('aria-label', day.title);
+                days.push(day);
+            }
+            checkinDays.replaceChildren(...days);
+        }
+        
+        checkinButton.addEventListener('click', () => {
+            if (checkinButton.getAttribute('aria-pressed') === 'true') {
+                undoCheckIn();
+                showToast('Check-in removed');
+            } else {
+                checkIn();
+            }
+        });
         
         // ---- Reflection journal ----
         const JOURNAL_KEY = 'versesGenerator.journal';
@@ -1280,6 +1398,7 @@
             renderJournal();
             if (note) {
                 showToast('Note saved');
+                checkIn();
             }
         }
         

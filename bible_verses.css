@@ -584,6 +584,72 @@ h1 {
     background-color: var(--accent-hover);
 }
 
+/* ---- Gentle daily check-in ---- */
+/* On small screens the two home columns flow as one list, with the check-in last */
+.home-layout {
+    display: flex;
+    flex-direction: column;
+}
+
+.home-side,
+.home-main {
+    display: contents;
+}
+
+.checkin-card {
+    order: 1;
+    margin-top: 24px;
+    padding: 18px 16px;
+    border: 2px solid var(--surface-muted);
+    border-radius: var(--radius);
+}
+
+.checkin-message {
+    margin: 0 0 12px;
+}
+
+.checkin-button {
+    width: 100%;
+}
+
+.checkin-button[aria-pressed="true"] {
+    background-color: var(--chip);
+    color: var(--text);
+}
+
+.checkin-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    margin: 16px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.checkin-day {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    max-width: 44px;
+    width: 100%;
+    justify-self: center;
+    border-radius: 50%;
+    background-color: var(--chip);
+    color: var(--text-muted);
+    font-size: 0.8125rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.checkin-day.done {
+    background-color: var(--accent);
+    color: var(--on-accent);
+    font-weight: 700;
+}
+
+.checkin-day.today {
+    box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--label);
+}
+
 /* ---- Journal ---- */
 .journal-verse {
     padding: 14px;
@@ -751,6 +817,11 @@ h1 {
 
     .view-tabs {
         max-width: 480px;
+    }
+
+    .home-side,
+    .home-main {
+        display: block;
     }
 
     .home-layout {

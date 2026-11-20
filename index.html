@@ -67,6 +67,16 @@
                         <button type="button" class="action-button" data-action="reflect">&#9998; Reflect</button>
                     </div>
                 </section>
+                
+                <section class="checkin-card" aria-labelledby="checkin-heading">
+                    <div class="daily-header">
+                        <h2 id="checkin-heading" class="daily-label">Daily check-in</h2>
+                        <span class="daily-date" id="checkin-summary"></span>
+                    </div>
+                    <p class="checkin-message" id="checkin-message" aria-live="polite"></p>
+                    <button type="button" class="primary-button checkin-button" id="checkin-button" aria-pressed="false">Check in for today</button>
+                    <ol class="checkin-days" id="checkin-days" aria-label="Last 14 days"></ol>
+                </section>
             </div>
             
             <div class="home-main">
