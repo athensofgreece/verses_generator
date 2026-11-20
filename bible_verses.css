@@ -1,100 +1,404 @@
-html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            background-color: #f8f9fa;
-            color: #333;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .container {
-            background-color: white;
-            border-radius: 10px;
-            padding: 30px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 600px;
-            margin: 20px;
-        }
-        
-        h1 {
-            color: #4a6fa5;
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 28px;
-        }
-        
-        .verse-box {
-            background-color: #e9f0f9;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 25px;
-            transition: all 0.3s ease;
-        }
-        
-        .verse-text {
-            font-size: 20px;
-            margin-bottom: 10px;
-            color: #2c3e50;
-        }
-        
-        .verse-reference {
-            font-style: italic;
-            text-align: right;
-            color: #7f8c8d;
-            font-size: 16px;
-        }
-        
-        .category {
-            font-size: 14px;
-            color: #3498db;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
-            font-weight: bold;
-        }
-        
-        button {
-            background-color: #4a6fa5;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 16px;
-            display: block;
-            margin: 0 auto;
-            transition: background-color 0.3s;
-        }
-        
-        button:hover {
-            background-color: #3a5a80;
-        }
-        
-        .filter-controls {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
-            justify-content: center;
-        }
-        
-        .filter-button {
-            background-color: #e0e0e0;
-            color: #333;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s;
-        }
-        
-        .filter-button.active {
-            background-color: #4a6fa5;
-            color: white;
-        }
+/* Theme colours. Light is the default; html[data-theme="dark"] overrides. */
+:root {
+    --bg: #f4f6f8;
+    --surface: #ffffff;
+    --surface-muted: #e9f0f9;
+    --chip: #e9eef4;
+    --chip-hover: #d6e0eb;
+    --text: #2c3e50;
+    --text-muted: #5f6b78;
+    --label: #2a72a8;
+    --accent: #4a6fa5;
+    --accent-hover: #3a5a80;
+    --on-accent: #ffffff;
+    --border: #c9d6e6;
+    --focus: #e0a526;
+    --shadow: 0 4px 16px rgba(20, 40, 60, 0.08);
+    --radius: 16px;
+    --radius-small: 12px;
+    --tap: 48px;
+    color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+    --bg: #12171d;
+    --surface: #1b232c;
+    --surface-muted: #233040;
+    --chip: #26313d;
+    --chip-hover: #324050;
+    --text: #e4e9ef;
+    --text-muted: #a3afbc;
+    --label: #8cc0ea;
+    --accent: #8fb4dc;
+    --accent-hover: #a9c7e8;
+    --on-accent: #10161d;
+    --border: #3a4a5c;
+    --shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+    color-scheme: dark;
+}
+
+/* ---- Base (mobile first) ---- */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+body {
+    margin: 0;
+    padding: 10px;
+    min-height: 100vh;
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 17px;
+    line-height: 1.6;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.container {
+    width: 100%;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 20px 14px 28px;
+    background-color: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+button {
+    font: inherit;
+    border: none;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+button:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+}
+
+/* ---- Header ---- */
+.app-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+h1 {
+    margin: 0;
+    font-size: 24px;
+    line-height: 1.25;
+    color: var(--accent);
+}
+
+.subtitle {
+    margin: 4px 0 0;
+    font-size: 15px;
+    color: var(--text-muted);
+}
+
+.theme-toggle {
+    flex-shrink: 0;
+    width: var(--tap);
+    height: var(--tap);
+    border-radius: 50%;
+    background-color: var(--chip);
+    color: var(--text);
+    font-size: 22px;
+    line-height: 1;
+}
+
+.theme-toggle:hover {
+    background-color: var(--chip-hover);
+}
+
+/* ---- Home / Favorites tabs ---- */
+.view-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    padding: 4px;
+    margin-bottom: 20px;
+    background-color: var(--chip);
+    border-radius: var(--radius-small);
+}
+
+.tab-button {
+    min-height: 44px;
+    padding: 8px;
+    border-radius: 9px;
+    background-color: transparent;
+    color: var(--text);
+    font-weight: 600;
+}
+
+.tab-button:hover {
+    background-color: var(--chip-hover);
+}
+
+.tab-button.active {
+    background-color: var(--surface);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+/* ---- Verse cards ---- */
+.daily-card,
+.verse-box,
+.favorite-item {
+    padding: 16px 14px;
+    border-radius: var(--radius);
+}
+
+.daily-card {
+    margin-bottom: 24px;
+    border: 2px solid var(--surface-muted);
+}
+
+.verse-box,
+.favorite-item {
+    background-color: var(--surface-muted);
+}
+
+.verse-box {
+    margin-bottom: 20px;
+}
+
+.daily-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 4px 12px;
+    margin-bottom: 8px;
+}
+
+.daily-label,
+.category {
+    margin: 0 0 8px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--label);
+}
+
+.daily-label {
+    margin: 0;
+}
+
+.daily-date {
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.verse-text {
+    margin-bottom: 8px;
+    font-size: 20px;
+    line-height: 1.65;
+    color: var(--text);
+}
+
+.daily-card .verse-text,
+.favorite-item .verse-text {
+    font-size: 18px;
+}
+
+.verse-reference {
+    font-size: 16px;
+    font-style: italic;
+    text-align: right;
+    color: var(--text-muted);
+}
+
+.verse-box.fade-in .verse-text,
+.verse-box.fade-in .verse-reference {
+    animation: fade-in 0.35s ease;
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* ---- Save / Copy / Share / Remove ---- */
+.verse-actions {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.action-button {
+    min-height: 44px;
+    padding: 8px 4px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background-color: var(--surface);
+    color: var(--accent);
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.action-button:hover {
+    background-color: var(--chip);
+}
+
+.action-button[aria-pressed="true"] {
+    background-color: var(--accent);
+    border-color: var(--accent);
+    color: var(--on-accent);
+}
+
+/* ---- Mood selector ---- */
+.mood-section {
+    margin-bottom: 20px;
+}
+
+.section-title {
+    margin: 0 0 12px;
+    font-size: 18px;
+    text-align: center;
+    color: var(--text);
+}
+
+.mood-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.mood-button {
+    min-height: var(--tap);
+    padding: 10px 6px;
+    border-radius: var(--radius-small);
+    background-color: var(--chip);
+    color: var(--text);
+    font-size: 16px;
+}
+
+.mood-button:hover {
+    background-color: var(--chip-hover);
+}
+
+.mood-button.active {
+    background-color: var(--accent);
+    color: var(--on-accent);
+    font-weight: 600;
+}
+
+.mood-any {
+    grid-column: 1 / -1;
+}
+
+/* ---- Primary action ---- */
+#generate-button {
+    display: block;
+    width: 100%;
+    min-height: 52px;
+    margin: 0 auto;
+    padding: 12px 24px;
+    border-radius: var(--radius-small);
+    background-color: var(--accent);
+    color: var(--on-accent);
+    font-size: 18px;
+    font-weight: 600;
+}
+
+#generate-button:hover {
+    background-color: var(--accent-hover);
+}
+
+/* ---- Favorites view ---- */
+.favorites-list {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.favorites-empty {
+    margin: 0;
+    padding: 32px 8px;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+/* ---- Toast ---- */
+.toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    width: max-content;
+    max-width: calc(100% - 32px);
+    padding: 12px 20px;
+    border-radius: var(--radius-small);
+    background-color: var(--text);
+    color: var(--surface);
+    font-size: 15px;
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, 20px);
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+.toast.visible {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
+/* ---- Larger screens ---- */
+@media (min-width: 560px) {
+    body {
+        padding: 32px 20px;
+    }
+
+    .container {
+        padding: 32px;
+    }
+
+    h1 {
+        font-size: 28px;
+    }
+
+    .daily-card,
+    .verse-box,
+    .favorite-item {
+        padding: 22px 24px;
+    }
+
+    .mood-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    #generate-button {
+        width: auto;
+        min-width: 240px;
+    }
+}
+
+/* ---- Respect reduced-motion preferences ---- */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+    }
+}

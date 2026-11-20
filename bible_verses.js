@@ -527,73 +527,450 @@
             }
         ];
 
+        // Display names for the original verse categories
+        const categoryDisplayNames = {
+            'focus': 'Focus & Attention',
+            'overwhelm': 'When Overwhelmed',
+            'strength': 'Strength & Energy',
+            'peace': 'Peace of Mind',
+            'purpose': 'Purpose & Direction'
+        };
+        
+        // Skip incomplete entries (e.g. empty placeholders) without changing the data above
+        const usableVerses = verses.filter(verse =>
+            verse.text && verse.text.trim() && verse.reference && verse.reference.trim()
+        );
+        
+        // Moods shown to the user. Each mood pulls whole categories and/or
+        // hand-picked references from the existing verse list.
+        const moods = {
+            all: { label: 'Any verse' },
+            distracted: { label: 'Distracted', categories: ['focus'] },
+            anxious: {
+                label: 'Anxious',
+                categories: ['peace'],
+                references: ['Philippians 4:6-7', '1 Peter 5:7', 'Psalm 94:19', 'Psalm 34:4', 'Isaiah 41:10', 'Matthew 6:34']
+            },
+            overwhelmed: { label: 'Overwhelmed', categories: ['overwhelm'] },
+            strength: { label: 'Need Strength', categories: ['strength'] },
+            hope: {
+                label: 'Need Hope',
+                references: [
+                    'Jeremiah 29:11', 'Isaiah 40:31', 'Lamentations 3:22-23', 'Psalm 42:5',
+                    'Romans 8:28', 'Isaiah 43:18-19', 'Psalm 73:26', 'John 16:33',
+                    'Psalm 138:8', 'Psalm 27:1', 'Nehemiah 8:10', 'Psalm 46:1',
+                    'Isaiah 41:10', 'Deuteronomy 31:6', 'Psalm 28:7'
+                ]
+            },
+            direction: { label: 'Need Direction', categories: ['purpose'] }
+        };
+        
         // DOM elements
         const generateButton = document.getElementById('generate-button');
         const verseText = document.getElementById('verse-text');
         const verseReference = document.getElementById('verse-reference');
         const verseCategory = document.getElementById('verse-category');
-        const filterButtons = document.querySelectorAll('.filter-button');
+        const verseBox = document.querySelector('.verse-box');
+        const moodButtons = document.querySelectorAll('.mood-button');
         
-        let currentCategory = 'all';
+        let currentMood = 'all';
+        let currentVerse = null;
         
-        // Generate a random verse based on the selected category
-        function generateVerse() {
-            let filteredVerses = verses;
-            
-            // Filter verses by category if not "all"
-            if (currentCategory !== 'all') {
-                filteredVerses = verses.filter(verse => verse.category === currentCategory);
+        function versesForMood(moodId) {
+            const mood = moods[moodId];
+            if (!mood || moodId === 'all') {
+                return usableVerses;
             }
+            const categories = mood.categories || [];
+            const references = mood.references || [];
+            const matches = usableVerses.filter(verse => categories.includes(verse.category));
             
-            // Get a random verse from the filtered list
-            const randomIndex = Math.floor(Math.random() * filteredVerses.length);
-            const selectedVerse = filteredVerses[randomIndex];
+            // Add hand-picked references once each, even if listed in several categories
+            const seen = new Set(matches.map(verse => verse.reference));
+            usableVerses.forEach(verse => {
+                if (references.includes(verse.reference) && !seen.has(verse.reference)) {
+                    seen.add(verse.reference);
+                    matches.push(verse);
+                }
+            });
+            return matches;
+        }
+        
+        // Pick a random verse, avoiding an immediate repeat when possible
+        function pickRandomVerse(list, previous) {
+            const options = list.length > 1 ? list.filter(verse => verse !== previous) : list;
+            return options[Math.floor(Math.random() * options.length)];
+        }
+        
+        // Generate a random verse for the selected mood
+        function generateVerse() {
+            const selectedVerse = pickRandomVerse(versesForMood(currentMood), currentVerse);
+            currentVerse = selectedVerse;
             
             // Update the display
             verseText.textContent = selectedVerse.text;
             verseReference.textContent = selectedVerse.reference;
+            verseCategory.textContent = currentMood === 'all'
+                ? categoryDisplayNames[selectedVerse.category] || selectedVerse.category
+                : moods[currentMood].label;
+            updateFavoriteButtons();
             
-            // Display the category name
-            const categoryDisplayNames = {
-                'focus': 'Focus & Attention',
-                'overwhelm': 'When Overwhelmed',
-                'strength': 'Strength & Energy',
-                'peace': 'Peace of Mind',
-                'purpose': 'Purpose & Direction',
-                'all': 'All Verses'
-            };
-            
-            verseCategory.textContent = categoryDisplayNames[selectedVerse.category] || selectedVerse.category;
-            
-            // Add a subtle animation
-            verseText.style.opacity = '0';
-            verseReference.style.opacity = '0';
-            
-            setTimeout(() => {
-                verseText.style.opacity = '1';
-                verseReference.style.opacity = '1';
-            }, 100);
+            // Restart the gentle fade-in (disabled for prefers-reduced-motion in CSS)
+            verseBox.classList.remove('fade-in');
+            void verseBox.offsetWidth;
+            verseBox.classList.add('fade-in');
         }
+        
+        // On small screens, scroll the new verse into view after picking a mood
+        function bringVerseIntoView() {
+            const rect = verseBox.getBoundingClientRect();
+            if (rect.top < 0 || rect.bottom > window.innerHeight) {
+                const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                verseBox.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest' });
+            }
+        }
+        
+        // ---- Daily verse ----
+        // One entry per reference so the daily rotation never shows the same verse twice in a row
+        const dailyPool = usableVerses.filter((verse, index) =>
+            usableVerses.findIndex(other => other.reference === verse.reference) === index
+        );
+        
+        // A step that shares no factor with the pool size visits every verse before repeating
+        const dailyStep = (() => {
+            const gcd = (a, b) => (b === 0 ? a : gcd(b, a % b));
+            let step = 37;
+            while (gcd(step, dailyPool.length) !== 1) {
+                step++;
+            }
+            return step;
+        })();
+        
+        const dailyText = document.getElementById('daily-text');
+        const dailyReference = document.getElementById('daily-reference');
+        const dailyDate = document.getElementById('daily-date');
+        let dailyVerse = null;
+        let dailyDayNumber = null;
+        
+        // Whole days since 1970-01-01 in the user's local calendar (DST-safe)
+        function localDayNumber(date) {
+            return Math.floor(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86400000);
+        }
+        
+        function verseForDay(dayNumber) {
+            return dailyPool[(dayNumber * dailyStep) % dailyPool.length];
+        }
+        
+        function showDailyVerse() {
+            const now = new Date();
+            const dayNumber = localDayNumber(now);
+            if (dayNumber === dailyDayNumber) {
+                return;
+            }
+            dailyDayNumber = dayNumber;
+            dailyVerse = verseForDay(dayNumber);
+            dailyText.textContent = dailyVerse.text;
+            dailyReference.textContent = dailyVerse.reference;
+            dailyDate.textContent = now.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
+            updateFavoriteButtons();
+        }
+        
+        // Refresh the daily verse after midnight, including when a tab is reopened
+        function scheduleDailyRefresh() {
+            const now = new Date();
+            const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 1);
+            setTimeout(() => {
+                showDailyVerse();
+                scheduleDailyRefresh();
+            }, nextMidnight - now);
+        }
+        
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                showDailyVerse();
+            }
+        });
+        
+        // ---- Favorites ----
+        const FAVORITES_KEY = 'versesGenerator.favorites';
+        const favoritesList = document.getElementById('favorites-list');
+        const favoritesEmpty = document.getElementById('favorites-empty');
+        const favoritesCount = document.getElementById('favorites-count');
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const views = {
+            home: document.getElementById('view-home'),
+            favorites: document.getElementById('view-favorites')
+        };
+        
+        // Reference + text, because a few references appear with different wording
+        const verseKey = verse => verse.reference + '|' + verse.text;
+        
+        function loadFavorites() {
+            try {
+                const saved = JSON.parse(localStorage.getItem(FAVORITES_KEY));
+                return Array.isArray(saved)
+                    ? saved.filter(verse => verse && typeof verse.text === 'string' && typeof verse.reference === 'string')
+                    : [];
+            } catch (error) {
+                return [];
+            }
+        }
+        
+        let favorites = loadFavorites();
+        
+        function saveFavorites() {
+            try {
+                localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+            } catch (error) {
+                // Storage unavailable (e.g. private browsing): favorites last for this visit only
+            }
+        }
+        
+        function isFavorite(verse) {
+            return Boolean(verse) && favorites.some(saved => verseKey(saved) === verseKey(verse));
+        }
+        
+        function toggleFavorite(verse) {
+            if (isFavorite(verse)) {
+                favorites = favorites.filter(saved => verseKey(saved) !== verseKey(verse));
+            } else {
+                favorites.unshift({ text: verse.text, reference: verse.reference, category: verse.category });
+            }
+            saveFavorites();
+            renderFavorites();
+        }
+        
+        // Find the verse an action button belongs to (daily card, random card or a favorite)
+        function verseForActions(element) {
+            const actions = element.closest('.verse-actions');
+            if (actions.dataset.target === 'daily') {
+                return dailyVerse;
+            }
+            if (actions.dataset.target === 'random') {
+                return currentVerse;
+            }
+            return favorites.find(saved => verseKey(saved) === actions.dataset.key);
+        }
+        
+        function updateFavoriteButtons() {
+            document.querySelectorAll('[data-action="favorite"]').forEach(button => {
+                const saved = isFavorite(verseForActions(button));
+                button.setAttribute('aria-pressed', String(saved));
+                button.textContent = saved ? '\u2605 Saved' : '\u2606 Save';
+            });
+        }
+        
+        function createActionButton(action, label) {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'action-button';
+            button.dataset.action = action;
+            button.textContent = label;
+            return button;
+        }
+        
+        function createFavoriteItem(verse) {
+            const item = document.createElement('li');
+            item.className = 'favorite-item';
+            
+            const text = document.createElement('div');
+            text.className = 'verse-text';
+            text.textContent = verse.text;
+            
+            const reference = document.createElement('div');
+            reference.className = 'verse-reference';
+            reference.textContent = verse.reference;
+            
+            const actions = document.createElement('div');
+            actions.className = 'verse-actions';
+            actions.dataset.key = verseKey(verse);
+            actions.append(
+                createActionButton('copy', 'Copy'),
+                createActionButton('share', 'Share'),
+                createActionButton('remove', 'Remove')
+            );
+            
+            item.append(text, reference, actions);
+            return item;
+        }
+        
+        function renderFavorites() {
+            favoritesList.replaceChildren(...favorites.map(createFavoriteItem));
+            favoritesEmpty.hidden = favorites.length > 0;
+            favoritesCount.textContent = favorites.length;
+            updateFavoriteButtons();
+        }
+        
+        function showView(name) {
+            Object.entries(views).forEach(([key, view]) => {
+                view.hidden = key !== name;
+            });
+            tabButtons.forEach(button => {
+                const active = button.dataset.view === name;
+                button.classList.toggle('active', active);
+                button.setAttribute('aria-pressed', String(active));
+            });
+        }
+        
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => showView(button.dataset.view));
+        });
+        
+        // Another open tab changed favorites: reload so this tab doesn't overwrite them
+        window.addEventListener('storage', event => {
+            if (event.key === FAVORITES_KEY || event.key === null) {
+                favorites = loadFavorites();
+                renderFavorites();
+            }
+        });
+        
+        // ---- Copy & share ----
+        const toast = document.getElementById('toast');
+        let toastTimer = null;
+        
+        function showToast(message) {
+            toast.textContent = message;
+            toast.classList.add('visible');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.remove('visible'), 2500);
+        }
+        
+        function formatVerse(verse) {
+            return '"' + verse.text + '" \u2014 ' + verse.reference;
+        }
+        
+        async function copyText(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    return true;
+                } catch (error) {
+                    // Fall through to the legacy method below
+                }
+            }
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.setAttribute('readonly', '');
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            let copied = false;
+            try {
+                copied = document.execCommand('copy');
+            } catch (error) {
+                copied = false;
+            }
+            textarea.remove();
+            return copied;
+        }
+        
+        async function copyVerse(verse) {
+            const copied = await copyText(formatVerse(verse));
+            showToast(copied ? 'Verse copied' : 'Could not copy. Please select the text instead.');
+        }
+        
+        async function shareVerse(verse) {
+            if (navigator.share) {
+                try {
+                    await navigator.share({ title: verse.reference, text: formatVerse(verse), url: window.location.href });
+                    return;
+                } catch (error) {
+                    if (error.name === 'AbortError') {
+                        return; // The user closed the share sheet
+                    }
+                }
+            }
+            const copied = await copyText(formatVerse(verse));
+            showToast(copied ? 'Sharing isn\u2019t available here, so the verse was copied' : 'Could not share or copy this verse.');
+        }
+        
+        // One listener handles every verse action button, including ones added later
+        document.addEventListener('click', event => {
+            const button = event.target.closest('[data-action]');
+            if (!button) {
+                return;
+            }
+            const verse = verseForActions(button);
+            if (!verse) {
+                return;
+            }
+            const action = button.dataset.action;
+            if (action === 'favorite' || action === 'remove') {
+                toggleFavorite(verse);
+            } else if (action === 'copy') {
+                copyVerse(verse);
+            } else if (action === 'share') {
+                shareVerse(verse);
+            }
+        });
         
         // Set up event listeners
         generateButton.addEventListener('click', generateVerse);
         
-        // Set up filter buttons
-        filterButtons.forEach(button => {
+        // Set up mood buttons
+        moodButtons.forEach(button => {
             button.addEventListener('click', () => {
-                // Remove active class from all buttons
-                filterButtons.forEach(btn => btn.classList.remove('active'));
-                
-                // Add active class to clicked button
+                moodButtons.forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.setAttribute('aria-pressed', 'false');
+                });
                 button.classList.add('active');
+                button.setAttribute('aria-pressed', 'true');
                 
-                // Update current category
-                currentCategory = button.getAttribute('data-category');
+                currentMood = button.getAttribute('data-mood');
                 
-                // Generate a new verse with the selected category
+                // Generate a new verse for the selected mood
                 generateVerse();
+                bringVerseIntoView();
             });
         });
         
-        // Generate a verse on page load
+        // ---- Dark mode ----
+        // The inline script in index.html sets data-theme before first paint
+        const THEME_KEY = 'versesGenerator.theme';
+        const themeToggle = document.getElementById('theme-toggle');
+        
+        function applyTheme(theme) {
+            const dark = theme === 'dark';
+            const label = dark ? 'Switch to light mode' : 'Switch to dark mode';
+            document.documentElement.setAttribute('data-theme', theme);
+            themeToggle.textContent = dark ? '\u2600' : '\u263E';
+            themeToggle.setAttribute('aria-label', label);
+            themeToggle.title = label;
+        }
+        
+        function savedTheme() {
+            try {
+                return localStorage.getItem(THEME_KEY);
+            } catch (error) {
+                return null;
+            }
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            applyTheme(next);
+            try {
+                localStorage.setItem(THEME_KEY, next);
+            } catch (error) {
+                // Storage unavailable: the choice lasts for this visit only
+            }
+        });
+        
+        // Follow the system setting until the user picks a theme
+        if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+                if (!savedTheme()) {
+                    applyTheme(event.matches ? 'dark' : 'light');
+                }
+            });
+        }
+        
+        applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+        
+        // Initial render
+        showDailyVerse();
+        scheduleDailyRefresh();
+        renderFavorites();
         generateVerse();

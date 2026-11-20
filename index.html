@@ -3,30 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A calm, ADHD-friendly Bible verse companion: pick how you feel, get a verse, save your favorites.">
+    <meta name="theme-color" content="#4a6fa5">
     <title>ADHD-Friendly Bible Verse Generator</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%234a6fa5'/%3E%3Cpath d='M50 20v60M30 40h40' stroke='white' stroke-width='10' stroke-linecap='round'/%3E%3C/svg%3E">
+    <script>
+        // Apply the saved (or system) theme before first paint to avoid a flash
+        (function () {
+            var theme = null;
+            try {
+                theme = localStorage.getItem('versesGenerator.theme');
+            } catch (error) {}
+            if (theme !== 'dark' && theme !== 'light') {
+                theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
     <link rel="stylesheet" href="bible_verses.css"> <!-- Link to external CSS file -->
 </head>
 <body>
     <div class="container">
-        <h1>Bible Verses for ADHD</h1>
+        <header class="app-header">
+            <div>
+                <h1>Bible Verses for ADHD</h1>
+                <p class="subtitle">A calm verse for whatever you're feeling.</p>
+            </div>
+            <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Switch to dark mode" title="Switch to dark mode">&#9790;</button>
+        </header>
         
-        <div class="filter-controls">
-            <button class="filter-button active" data-category="all">All Verses</button>
-            <button class="filter-button" data-category="focus">Focus & Attention</button>
-            <button class="filter-button" data-category="overwhelm">When Overwhelmed</button>
-            <button class="filter-button" data-category="strength">Strength & Energy</button>
-            <button class="filter-button" data-category="peace">Peace of Mind</button>
-            <button class="filter-button" data-category="purpose">Purpose & Direction</button>
-        </div>
+        <nav class="view-tabs" aria-label="Views">
+            <button type="button" class="tab-button active" id="tab-home" data-view="home" aria-pressed="true">Home</button>
+            <button type="button" class="tab-button" id="tab-favorites" data-view="favorites" aria-pressed="false">Favorites (<span id="favorites-count">0</span>)</button>
+        </nav>
         
-        <div class="verse-box">
-            <div class="category" id="verse-category">All Verses</div>
-            <div class="verse-text" id="verse-text">Click the button below to generate a Bible verse.</div>
-            <div class="verse-reference" id="verse-reference"></div>
-        </div>
+        <main id="view-home">
+            <section class="daily-card" aria-labelledby="daily-heading">
+                <div class="daily-header">
+                    <h2 id="daily-heading" class="daily-label">Verse of the day</h2>
+                    <span class="daily-date" id="daily-date"></span>
+                </div>
+                <div class="verse-text" id="daily-text"></div>
+                <div class="verse-reference" id="daily-reference"></div>
+                <div class="verse-actions" data-target="daily">
+                    <button type="button" class="action-button" data-action="favorite" aria-pressed="false">&#9734; Save</button>
+                    <button type="button" class="action-button" data-action="copy">Copy</button>
+                    <button type="button" class="action-button" data-action="share">Share</button>
+                </div>
+            </section>
+            
+            <section class="mood-section" aria-labelledby="mood-heading">
+                <h2 id="mood-heading" class="section-title">How are you feeling?</h2>
+                <div class="mood-grid" role="group" aria-labelledby="mood-heading">
+                    <button type="button" class="mood-button" data-mood="distracted" aria-pressed="false">Distracted</button>
+                    <button type="button" class="mood-button" data-mood="anxious" aria-pressed="false">Anxious</button>
+                    <button type="button" class="mood-button" data-mood="overwhelmed" aria-pressed="false">Overwhelmed</button>
+                    <button type="button" class="mood-button" data-mood="strength" aria-pressed="false">Need Strength</button>
+                    <button type="button" class="mood-button" data-mood="hope" aria-pressed="false">Need Hope</button>
+                    <button type="button" class="mood-button" data-mood="direction" aria-pressed="false">Need Direction</button>
+                    <button type="button" class="mood-button mood-any active" data-mood="all" aria-pressed="true">Any verse</button>
+                </div>
+            </section>
+            
+            <div class="verse-box">
+                <div class="category" id="verse-category">Any verse</div>
+                <div class="verse-text" id="verse-text">Click the button below to generate a Bible verse.</div>
+                <div class="verse-reference" id="verse-reference"></div>
+                <div class="verse-actions" data-target="random">
+                    <button type="button" class="action-button" data-action="favorite" aria-pressed="false">&#9734; Save</button>
+                    <button type="button" class="action-button" data-action="copy">Copy</button>
+                    <button type="button" class="action-button" data-action="share">Share</button>
+                </div>
+            </div>
+            
+            <button type="button" id="generate-button">New Verse</button>
+        </main>
         
-        <button id="generate-button">New Verse</button>
+        <section id="view-favorites" aria-label="Favorite verses" hidden>
+            <p class="favorites-empty" id="favorites-empty">No favorites yet. Tap &#9734; Save on any verse to keep it here.</p>
+            <ul class="favorites-list" id="favorites-list"></ul>
+        </section>
     </div>
+    
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
     <script src="bible_verses.js"></script> <!-- Link to external JavaScript file -->
 </body>
