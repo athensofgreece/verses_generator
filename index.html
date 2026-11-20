@@ -4,11 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ADHD-Friendly Bible Verse Generator</title>
+    <script>
+        // Apply the saved (or system) theme before first paint to avoid a flash
+        (function () {
+            var theme = null;
+            try {
+                theme = localStorage.getItem('versesGenerator.theme');
+            } catch (error) {}
+            if (theme !== 'dark' && theme !== 'light') {
+                theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
     <link rel="stylesheet" href="bible_verses.css"> <!-- Link to external CSS file -->
 </head>
 <body>
     <div class="container">
-        <h1>Bible Verses for ADHD</h1>
+        <header class="app-header">
+            <h1>Bible Verses for ADHD</h1>
+            <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Switch to dark mode" title="Switch to dark mode">&#9790;</button>
+        </header>
         
         <nav class="view-tabs" aria-label="Views">
             <button type="button" class="tab-button active" id="tab-home" data-view="home" aria-pressed="true">Home</button>

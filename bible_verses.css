@@ -1,9 +1,44 @@
+        /* Theme colours. Light is the default; html[data-theme="dark"] overrides. */
+        :root {
+            --bg: #f8f9fa;
+            --surface: #ffffff;
+            --surface-muted: #e9f0f9;
+            --chip: #e9eef4;
+            --chip-hover: #d6e0eb;
+            --text: #2c3e50;
+            --text-muted: #5f6b78;
+            --label: #2a72a8;
+            --accent: #4a6fa5;
+            --accent-hover: #3a5a80;
+            --on-accent: #ffffff;
+            --border: #c9d6e6;
+            --shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            color-scheme: light;
+        }
+        
+        :root[data-theme="dark"] {
+            --bg: #12171d;
+            --surface: #1b232c;
+            --surface-muted: #233040;
+            --chip: #26313d;
+            --chip-hover: #324050;
+            --text: #e4e9ef;
+            --text-muted: #a3afbc;
+            --label: #8cc0ea;
+            --accent: #8fb4dc;
+            --accent-hover: #a9c7e8;
+            --on-accent: #10161d;
+            --border: #3a4a5c;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+            color-scheme: dark;
+        }
+        
 html, body {
             height: 100%;
             margin: 0;
             padding: 0;
-            background-color: #f8f9fa;
-            color: #333;
+            background-color: var(--bg);
+            color: var(--text);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
         }
@@ -17,24 +52,24 @@ html, body {
         }
         
         .container {
-            background-color: white;
+            background-color: var(--surface);
             border-radius: 10px;
             padding: 30px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow);
             width: 100%;
             max-width: 600px;
             margin: 20px;
         }
         
         h1 {
-            color: #4a6fa5;
+            color: var(--accent);
             text-align: center;
             margin-bottom: 30px;
             font-size: 28px;
         }
         
         .verse-box {
-            background-color: #e9f0f9;
+            background-color: var(--surface-muted);
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 25px;
@@ -44,19 +79,19 @@ html, body {
         .verse-text {
             font-size: 20px;
             margin-bottom: 10px;
-            color: #2c3e50;
+            color: var(--text);
         }
         
         .verse-reference {
             font-style: italic;
             text-align: right;
-            color: #7f8c8d;
+            color: var(--text-muted);
             font-size: 16px;
         }
         
         .category {
             font-size: 14px;
-            color: #3498db;
+            color: var(--label);
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-bottom: 10px;
@@ -64,8 +99,8 @@ html, body {
         }
         
         button {
-            background-color: #4a6fa5;
-            color: white;
+            background-color: var(--accent);
+            color: var(--on-accent);
             border: none;
             padding: 12px 24px;
             border-radius: 6px;
@@ -73,15 +108,15 @@ html, body {
             font-size: 16px;
             display: block;
             margin: 0 auto;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s, color 0.3s;
         }
         
         button:hover {
-            background-color: #3a5a80;
+            background-color: var(--accent-hover);
         }
         
         .daily-card {
-            border: 2px solid #e9f0f9;
+            border: 2px solid var(--surface-muted);
             border-radius: 8px;
             padding: 16px 20px;
             margin-bottom: 25px;
@@ -97,7 +132,7 @@ html, body {
         
         .daily-label {
             font-size: 14px;
-            color: #3498db;
+            color: var(--label);
             text-transform: uppercase;
             letter-spacing: 1px;
             margin: 0;
@@ -105,7 +140,7 @@ html, body {
         
         .daily-date {
             font-size: 14px;
-            color: #7f8c8d;
+            color: var(--text-muted);
         }
         
         .mood-section {
@@ -114,7 +149,7 @@ html, body {
         
         .section-title {
             font-size: 18px;
-            color: #2c3e50;
+            color: var(--text);
             text-align: center;
             margin: 0 0 12px;
         }
@@ -126,8 +161,8 @@ html, body {
         }
         
         .mood-button {
-            background-color: #e9eef4;
-            color: #2c3e50;
+            background-color: var(--chip);
+            color: var(--text);
             min-height: 48px;
             padding: 10px 12px;
             border-radius: 12px;
@@ -137,12 +172,12 @@ html, body {
         }
         
         .mood-button:hover {
-            background-color: #d6e0eb;
+            background-color: var(--chip-hover);
         }
         
         .mood-button.active {
-            background-color: #4a6fa5;
-            color: white;
+            background-color: var(--accent);
+            color: var(--on-accent);
         }
         
         .mood-any {
@@ -163,7 +198,7 @@ html, body {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 6px;
-            background-color: #eef2f6;
+            background-color: var(--chip);
             padding: 4px;
             border-radius: 12px;
             margin-bottom: 20px;
@@ -171,7 +206,7 @@ html, body {
         
         .tab-button {
             background-color: transparent;
-            color: #2c3e50;
+            color: var(--text);
             width: 100%;
             min-height: 44px;
             margin: 0;
@@ -179,12 +214,12 @@ html, body {
         }
         
         .tab-button:hover {
-            background-color: #dfe6ee;
+            background-color: var(--chip-hover);
         }
         
         .tab-button.active {
-            background-color: white;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+            background-color: var(--surface);
+            box-shadow: var(--shadow);
         }
         
         .verse-actions {
@@ -195,9 +230,9 @@ html, body {
         }
         
         .action-button {
-            background-color: white;
-            color: #4a6fa5;
-            border: 1px solid #c9d6e6;
+            background-color: var(--surface);
+            color: var(--accent);
+            border: 1px solid var(--border);
             min-height: 44px;
             padding: 8px 16px;
             margin: 0;
@@ -205,13 +240,13 @@ html, body {
         }
         
         .action-button:hover {
-            background-color: #f0f4f9;
+            background-color: var(--chip);
         }
         
         .action-button[aria-pressed="true"] {
-            background-color: #4a6fa5;
-            border-color: #4a6fa5;
-            color: white;
+            background-color: var(--accent);
+            border-color: var(--accent);
+            color: var(--on-accent);
         }
         
         .favorites-list {
@@ -223,14 +258,14 @@ html, body {
         }
         
         .favorite-item {
-            background-color: #e9f0f9;
+            background-color: var(--surface-muted);
             border-radius: 8px;
             padding: 16px 20px;
         }
         
         .favorites-empty {
             text-align: center;
-            color: #7f8c8d;
+            color: var(--text-muted);
             padding: 24px 0;
         }
         
@@ -240,8 +275,8 @@ html, body {
             bottom: 24px;
             transform: translate(-50%, 20px);
             max-width: calc(100% - 32px);
-            background-color: #2c3e50;
-            color: white;
+            background-color: var(--text);
+            color: var(--surface);
             padding: 12px 20px;
             border-radius: 10px;
             font-size: 15px;
@@ -254,4 +289,34 @@ html, body {
         .toast.visible {
             opacity: 1;
             transform: translate(-50%, 0);
+        }
+        
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .app-header h1 {
+            margin: 0;
+            text-align: left;
+        }
+        
+        .theme-toggle {
+            flex-shrink: 0;
+            width: 48px;
+            height: 48px;
+            padding: 0;
+            margin: 0;
+            border-radius: 50%;
+            background-color: var(--chip);
+            color: var(--text);
+            font-size: 22px;
+            line-height: 1;
+        }
+        
+        .theme-toggle:hover {
+            background-color: var(--chip-hover);
         }

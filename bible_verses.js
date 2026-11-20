@@ -911,6 +911,49 @@
             });
         });
         
+        // ---- Dark mode ----
+        // The inline script in index.html sets data-theme before first paint
+        const THEME_KEY = 'versesGenerator.theme';
+        const themeToggle = document.getElementById('theme-toggle');
+        
+        function applyTheme(theme) {
+            const dark = theme === 'dark';
+            const label = dark ? 'Switch to light mode' : 'Switch to dark mode';
+            document.documentElement.setAttribute('data-theme', theme);
+            themeToggle.textContent = dark ? '\u2600' : '\u263E';
+            themeToggle.setAttribute('aria-label', label);
+            themeToggle.title = label;
+        }
+        
+        function savedTheme() {
+            try {
+                return localStorage.getItem(THEME_KEY);
+            } catch (error) {
+                return null;
+            }
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            applyTheme(next);
+            try {
+                localStorage.setItem(THEME_KEY, next);
+            } catch (error) {
+                // Storage unavailable: the choice lasts for this visit only
+            }
+        });
+        
+        // Follow the system setting until the user picks a theme
+        if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+                if (!savedTheme()) {
+                    applyTheme(event.matches ? 'dark' : 'light');
+                }
+            });
+        }
+        
+        applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+        
         // Initial render
         showDailyVerse();
         scheduleDailyRefresh();
