@@ -536,14 +536,32 @@
             'purpose': 'Purpose & Direction'
         };
         
-        // Moods shown to the user, mapped onto the original verse categories
+        // Skip incomplete entries (e.g. empty placeholders) without changing the data above
+        const usableVerses = verses.filter(verse =>
+            verse.text && verse.text.trim() && verse.reference && verse.reference.trim()
+        );
+        
+        // Moods shown to the user. Each mood pulls whole categories and/or
+        // hand-picked references from the existing verse list.
         const moods = {
             all: { label: 'Any verse' },
             distracted: { label: 'Distracted', categories: ['focus'] },
-            anxious: { label: 'Anxious', categories: ['peace'] },
+            anxious: {
+                label: 'Anxious',
+                categories: ['peace'],
+                references: ['Philippians 4:6-7', '1 Peter 5:7', 'Psalm 94:19', 'Psalm 34:4', 'Isaiah 41:10', 'Matthew 6:34']
+            },
             overwhelmed: { label: 'Overwhelmed', categories: ['overwhelm'] },
             strength: { label: 'Need Strength', categories: ['strength'] },
-            hope: { label: 'Need Hope', categories: ['strength', 'purpose'] },
+            hope: {
+                label: 'Need Hope',
+                references: [
+                    'Jeremiah 29:11', 'Isaiah 40:31', 'Lamentations 3:22-23', 'Psalm 42:5',
+                    'Romans 8:28', 'Isaiah 43:18-19', 'Psalm 73:26', 'John 16:33',
+                    'Psalm 138:8', 'Psalm 27:1', 'Nehemiah 8:10', 'Psalm 46:1',
+                    'Isaiah 41:10', 'Deuteronomy 31:6', 'Psalm 28:7'
+                ]
+            },
             direction: { label: 'Need Direction', categories: ['purpose'] }
         };
         
@@ -555,22 +573,38 @@
         const moodButtons = document.querySelectorAll('.mood-button');
         
         let currentMood = 'all';
+        let currentVerse = null;
         
         function versesForMood(moodId) {
             const mood = moods[moodId];
-            if (!mood || !mood.categories) {
-                return verses;
+            if (!mood || moodId === 'all') {
+                return usableVerses;
             }
-            return verses.filter(verse => mood.categories.includes(verse.category));
+            const categories = mood.categories || [];
+            const references = mood.references || [];
+            const matches = usableVerses.filter(verse => categories.includes(verse.category));
+            
+            // Add hand-picked references once each, even if listed in several categories
+            const seen = new Set(matches.map(verse => verse.reference));
+            usableVerses.forEach(verse => {
+                if (references.includes(verse.reference) && !seen.has(verse.reference)) {
+                    seen.add(verse.reference);
+                    matches.push(verse);
+                }
+            });
+            return matches;
+        }
+        
+        // Pick a random verse, avoiding an immediate repeat when possible
+        function pickRandomVerse(list, previous) {
+            const options = list.length > 1 ? list.filter(verse => verse !== previous) : list;
+            return options[Math.floor(Math.random() * options.length)];
         }
         
         // Generate a random verse for the selected mood
         function generateVerse() {
-            const filteredVerses = versesForMood(currentMood);
-            
-            // Get a random verse from the filtered list
-            const randomIndex = Math.floor(Math.random() * filteredVerses.length);
-            const selectedVerse = filteredVerses[randomIndex];
+            const selectedVerse = pickRandomVerse(versesForMood(currentMood), currentVerse);
+            currentVerse = selectedVerse;
             
             // Update the display
             verseText.textContent = selectedVerse.text;
