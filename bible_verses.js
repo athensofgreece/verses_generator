@@ -816,6 +816,14 @@
             button.addEventListener('click', () => showView(button.dataset.view));
         });
         
+        // Another open tab changed favorites: reload so this tab doesn't overwrite them
+        window.addEventListener('storage', event => {
+            if (event.key === FAVORITES_KEY || event.key === null) {
+                favorites = loadFavorites();
+                renderFavorites();
+            }
+        });
+        
         // ---- Copy & share ----
         const toast = document.getElementById('toast');
         let toastTimer = null;
