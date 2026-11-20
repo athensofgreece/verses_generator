@@ -570,6 +570,7 @@
         const verseText = document.getElementById('verse-text');
         const verseReference = document.getElementById('verse-reference');
         const verseCategory = document.getElementById('verse-category');
+        const verseBox = document.querySelector('.verse-box');
         const moodButtons = document.querySelectorAll('.mood-button');
         
         let currentMood = 'all';
@@ -614,14 +615,19 @@
                 : moods[currentMood].label;
             updateFavoriteButtons();
             
-            // Add a subtle animation
-            verseText.style.opacity = '0';
-            verseReference.style.opacity = '0';
-            
-            setTimeout(() => {
-                verseText.style.opacity = '1';
-                verseReference.style.opacity = '1';
-            }, 100);
+            // Restart the gentle fade-in (disabled for prefers-reduced-motion in CSS)
+            verseBox.classList.remove('fade-in');
+            void verseBox.offsetWidth;
+            verseBox.classList.add('fade-in');
+        }
+        
+        // On small screens, scroll the new verse into view after picking a mood
+        function bringVerseIntoView() {
+            const rect = verseBox.getBoundingClientRect();
+            if (rect.top < 0 || rect.bottom > window.innerHeight) {
+                const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                verseBox.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest' });
+            }
         }
         
         // ---- Daily verse ----
@@ -908,6 +914,7 @@
                 
                 // Generate a new verse for the selected mood
                 generateVerse();
+                bringVerseIntoView();
             });
         });
         
