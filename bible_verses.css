@@ -6,9 +6,14 @@ html, body {
             color: #333;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
+        }
+        
+        body {
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
+            min-height: 100%;
+            height: auto;
         }
         
         .container {
@@ -73,6 +78,34 @@ html, body {
         
         button:hover {
             background-color: #3a5a80;
+        }
+        
+        .daily-card {
+            border: 2px solid #e9f0f9;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 25px;
+        }
+        
+        .daily-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        
+        .daily-label {
+            font-size: 14px;
+            color: #3498db;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 0;
+        }
+        
+        .daily-date {
+            font-size: 14px;
+            color: #7f8c8d;
         }
         
         .mood-section {

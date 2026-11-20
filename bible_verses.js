@@ -623,6 +623,69 @@
             }, 100);
         }
         
+        // ---- Daily verse ----
+        // One entry per reference so the daily rotation never shows the same verse twice in a row
+        const dailyPool = usableVerses.filter((verse, index) =>
+            usableVerses.findIndex(other => other.reference === verse.reference) === index
+        );
+        
+        // A step that shares no factor with the pool size visits every verse before repeating
+        const dailyStep = (() => {
+            const gcd = (a, b) => (b === 0 ? a : gcd(b, a % b));
+            let step = 37;
+            while (gcd(step, dailyPool.length) !== 1) {
+                step++;
+            }
+            return step;
+        })();
+        
+        const dailyText = document.getElementById('daily-text');
+        const dailyReference = document.getElementById('daily-reference');
+        const dailyDate = document.getElementById('daily-date');
+        let dailyVerse = null;
+        let dailyDayNumber = null;
+        
+        // Whole days since 1970-01-01 in the user's local calendar (DST-safe)
+        function localDayNumber(date) {
+            return Math.floor(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86400000);
+        }
+        
+        function verseForDay(dayNumber) {
+            return dailyPool[(dayNumber * dailyStep) % dailyPool.length];
+        }
+        
+        function showDailyVerse() {
+            const now = new Date();
+            const dayNumber = localDayNumber(now);
+            if (dayNumber === dailyDayNumber) {
+                return;
+            }
+            dailyDayNumber = dayNumber;
+            dailyVerse = verseForDay(dayNumber);
+            dailyText.textContent = dailyVerse.text;
+            dailyReference.textContent = dailyVerse.reference;
+            dailyDate.textContent = now.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
+        }
+        
+        // Refresh the daily verse after midnight, including when a tab is reopened
+        function scheduleDailyRefresh() {
+            const now = new Date();
+            const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 1);
+            setTimeout(() => {
+                showDailyVerse();
+                scheduleDailyRefresh();
+            }, nextMidnight - now);
+        }
+        
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                showDailyVerse();
+            }
+        });
+        
+        showDailyVerse();
+        scheduleDailyRefresh();
+        
         // Set up event listeners
         generateButton.addEventListener('click', generateVerse);
         
