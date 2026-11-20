@@ -10,17 +10,21 @@
     <div class="container">
         <h1>Bible Verses for ADHD</h1>
         
-        <div class="filter-controls">
-            <button class="filter-button active" data-category="all">All Verses</button>
-            <button class="filter-button" data-category="focus">Focus & Attention</button>
-            <button class="filter-button" data-category="overwhelm">When Overwhelmed</button>
-            <button class="filter-button" data-category="strength">Strength & Energy</button>
-            <button class="filter-button" data-category="peace">Peace of Mind</button>
-            <button class="filter-button" data-category="purpose">Purpose & Direction</button>
-        </div>
+        <section class="mood-section" aria-labelledby="mood-heading">
+            <h2 id="mood-heading" class="section-title">How are you feeling?</h2>
+            <div class="mood-grid" role="group" aria-labelledby="mood-heading">
+                <button type="button" class="mood-button" data-mood="distracted" aria-pressed="false">Distracted</button>
+                <button type="button" class="mood-button" data-mood="anxious" aria-pressed="false">Anxious</button>
+                <button type="button" class="mood-button" data-mood="overwhelmed" aria-pressed="false">Overwhelmed</button>
+                <button type="button" class="mood-button" data-mood="strength" aria-pressed="false">Need Strength</button>
+                <button type="button" class="mood-button" data-mood="hope" aria-pressed="false">Need Hope</button>
+                <button type="button" class="mood-button" data-mood="direction" aria-pressed="false">Need Direction</button>
+                <button type="button" class="mood-button mood-any active" data-mood="all" aria-pressed="true">Any verse</button>
+            </div>
+        </section>
         
         <div class="verse-box">
-            <div class="category" id="verse-category">All Verses</div>
+            <div class="category" id="verse-category">Any verse</div>
             <div class="verse-text" id="verse-text">Click the button below to generate a Bible verse.</div>
             <div class="verse-reference" id="verse-reference"></div>
         </div>

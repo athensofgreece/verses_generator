@@ -75,26 +75,49 @@ html, body {
             background-color: #3a5a80;
         }
         
-        .filter-controls {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
+        .mood-section {
             margin-bottom: 20px;
-            justify-content: center;
         }
         
-        .filter-button {
-            background-color: #e0e0e0;
-            color: #333;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s;
+        .section-title {
+            font-size: 18px;
+            color: #2c3e50;
+            text-align: center;
+            margin: 0 0 12px;
         }
         
-        .filter-button.active {
+        .mood-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        
+        .mood-button {
+            background-color: #e9eef4;
+            color: #2c3e50;
+            min-height: 48px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            font-size: 16px;
+            width: 100%;
+            margin: 0;
+        }
+        
+        .mood-button:hover {
+            background-color: #d6e0eb;
+        }
+        
+        .mood-button.active {
             background-color: #4a6fa5;
             color: white;
+        }
+        
+        .mood-any {
+            grid-column: 1 / -1;
+        }
+        
+        @media (min-width: 520px) {
+            .mood-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
         }

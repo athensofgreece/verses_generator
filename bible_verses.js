@@ -527,23 +527,46 @@
             }
         ];
 
+        // Display names for the original verse categories
+        const categoryDisplayNames = {
+            'focus': 'Focus & Attention',
+            'overwhelm': 'When Overwhelmed',
+            'strength': 'Strength & Energy',
+            'peace': 'Peace of Mind',
+            'purpose': 'Purpose & Direction'
+        };
+        
+        // Moods shown to the user, mapped onto the original verse categories
+        const moods = {
+            all: { label: 'Any verse' },
+            distracted: { label: 'Distracted', categories: ['focus'] },
+            anxious: { label: 'Anxious', categories: ['peace'] },
+            overwhelmed: { label: 'Overwhelmed', categories: ['overwhelm'] },
+            strength: { label: 'Need Strength', categories: ['strength'] },
+            hope: { label: 'Need Hope', categories: ['strength', 'purpose'] },
+            direction: { label: 'Need Direction', categories: ['purpose'] }
+        };
+        
         // DOM elements
         const generateButton = document.getElementById('generate-button');
         const verseText = document.getElementById('verse-text');
         const verseReference = document.getElementById('verse-reference');
         const verseCategory = document.getElementById('verse-category');
-        const filterButtons = document.querySelectorAll('.filter-button');
+        const moodButtons = document.querySelectorAll('.mood-button');
         
-        let currentCategory = 'all';
+        let currentMood = 'all';
         
-        // Generate a random verse based on the selected category
-        function generateVerse() {
-            let filteredVerses = verses;
-            
-            // Filter verses by category if not "all"
-            if (currentCategory !== 'all') {
-                filteredVerses = verses.filter(verse => verse.category === currentCategory);
+        function versesForMood(moodId) {
+            const mood = moods[moodId];
+            if (!mood || !mood.categories) {
+                return verses;
             }
+            return verses.filter(verse => mood.categories.includes(verse.category));
+        }
+        
+        // Generate a random verse for the selected mood
+        function generateVerse() {
+            const filteredVerses = versesForMood(currentMood);
             
             // Get a random verse from the filtered list
             const randomIndex = Math.floor(Math.random() * filteredVerses.length);
@@ -552,18 +575,9 @@
             // Update the display
             verseText.textContent = selectedVerse.text;
             verseReference.textContent = selectedVerse.reference;
-            
-            // Display the category name
-            const categoryDisplayNames = {
-                'focus': 'Focus & Attention',
-                'overwhelm': 'When Overwhelmed',
-                'strength': 'Strength & Energy',
-                'peace': 'Peace of Mind',
-                'purpose': 'Purpose & Direction',
-                'all': 'All Verses'
-            };
-            
-            verseCategory.textContent = categoryDisplayNames[selectedVerse.category] || selectedVerse.category;
+            verseCategory.textContent = currentMood === 'all'
+                ? categoryDisplayNames[selectedVerse.category] || selectedVerse.category
+                : moods[currentMood].label;
             
             // Add a subtle animation
             verseText.style.opacity = '0';
@@ -578,19 +592,19 @@
         // Set up event listeners
         generateButton.addEventListener('click', generateVerse);
         
-        // Set up filter buttons
-        filterButtons.forEach(button => {
+        // Set up mood buttons
+        moodButtons.forEach(button => {
             button.addEventListener('click', () => {
-                // Remove active class from all buttons
-                filterButtons.forEach(btn => btn.classList.remove('active'));
-                
-                // Add active class to clicked button
+                moodButtons.forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.setAttribute('aria-pressed', 'false');
+                });
                 button.classList.add('active');
+                button.setAttribute('aria-pressed', 'true');
                 
-                // Update current category
-                currentCategory = button.getAttribute('data-category');
+                currentMood = button.getAttribute('data-mood');
                 
-                // Generate a new verse with the selected category
+                // Generate a new verse for the selected mood
                 generateVerse();
             });
         });
