@@ -37,6 +37,29 @@
     color-scheme: dark;
 }
 
+/* ---- Reading settings (the inline script in index.html sets these) ---- */
+html[data-text-size="small"] {
+    font-size: 93.75%;
+}
+
+html[data-text-size="large"] {
+    font-size: 112.5%;
+}
+
+html[data-text-size="xlarge"] {
+    font-size: 125%;
+}
+
+html[data-font="readable"] body {
+    font-family: Verdana, 'DejaVu Sans', Tahoma, 'Trebuchet MS', sans-serif;
+    letter-spacing: 0.03em;
+    word-spacing: 0.12em;
+}
+
+html[data-font="readable"] .verse-text {
+    line-height: 1.9;
+}
+
 /* ---- Base (mobile first) ---- */
 *,
 *::before,
@@ -55,7 +78,7 @@ body {
     background-color: var(--bg);
     color: var(--text);
     font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    font-size: 17px;
+    font-size: 1.0625rem;
     line-height: 1.6;
     transition: background-color 0.3s, color 0.3s;
 }
@@ -94,18 +117,24 @@ button:focus-visible {
 
 h1 {
     margin: 0;
-    font-size: 24px;
+    font-size: 1.5rem;
     line-height: 1.25;
     color: var(--accent);
 }
 
 .subtitle {
     margin: 4px 0 0;
-    font-size: 15px;
+    font-size: 0.9375rem;
     color: var(--text-muted);
 }
 
-.theme-toggle {
+.header-actions {
+    display: flex;
+    flex-shrink: 0;
+    gap: 8px;
+}
+
+.icon-button {
     flex-shrink: 0;
     width: var(--tap);
     height: var(--tap);
@@ -116,7 +145,7 @@ h1 {
     line-height: 1;
 }
 
-.theme-toggle:hover {
+.icon-button:hover {
     background-color: var(--chip-hover);
 }
 
@@ -183,7 +212,7 @@ h1 {
 .daily-label,
 .category {
     margin: 0 0 8px;
-    font-size: 13px;
+    font-size: 0.8125rem;
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -195,24 +224,24 @@ h1 {
 }
 
 .daily-date {
-    font-size: 14px;
+    font-size: 0.875rem;
     color: var(--text-muted);
 }
 
 .verse-text {
     margin-bottom: 8px;
-    font-size: 20px;
+    font-size: 1.25rem;
     line-height: 1.65;
     color: var(--text);
 }
 
 .daily-card .verse-text,
 .favorite-item .verse-text {
-    font-size: 18px;
+    font-size: 1.125rem;
 }
 
 .verse-reference {
-    font-size: 16px;
+    font-size: 1rem;
     font-style: italic;
     text-align: right;
     color: var(--text-muted);
@@ -249,7 +278,7 @@ h1 {
     border-radius: 10px;
     background-color: var(--surface);
     color: var(--accent);
-    font-size: 15px;
+    font-size: 0.9375rem;
     font-weight: 600;
 }
 
@@ -270,7 +299,7 @@ h1 {
 
 .section-title {
     margin: 0 0 12px;
-    font-size: 18px;
+    font-size: 1.125rem;
     text-align: center;
     color: var(--text);
 }
@@ -287,7 +316,8 @@ h1 {
     border-radius: var(--radius-small);
     background-color: var(--chip);
     color: var(--text);
-    font-size: 16px;
+    font-size: 1rem;
+    overflow-wrap: break-word;
 }
 
 .mood-button:hover {
@@ -314,7 +344,7 @@ h1 {
     border-radius: var(--radius-small);
     background-color: var(--accent);
     color: var(--on-accent);
-    font-size: 18px;
+    font-size: 1.125rem;
     font-weight: 600;
 }
 
@@ -338,6 +368,129 @@ h1 {
     color: var(--text-muted);
 }
 
+/* ---- Dialogs (settings and later panels) ---- */
+.sheet {
+    width: min(560px, calc(100% - 24px));
+    max-height: calc(100% - 24px);
+    padding: 0;
+    border: none;
+    border-radius: var(--radius);
+    background-color: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow);
+}
+
+.sheet::backdrop {
+    background-color: rgba(10, 20, 30, 0.5);
+}
+
+.sheet-body {
+    display: grid;
+    gap: 18px;
+    padding: 20px 18px 22px;
+}
+
+.sheet-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.sheet-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.settings-button {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.setting-group {
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+.setting-group legend {
+    margin-bottom: 8px;
+    padding: 0;
+    font-weight: 600;
+}
+
+.segmented {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.segmented label {
+    flex: 1 1 auto;
+}
+
+.segmented input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.segmented span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 8px 14px;
+    border-radius: var(--radius-small);
+    background-color: var(--chip);
+    color: var(--text);
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.segmented span:hover {
+    background-color: var(--chip-hover);
+}
+
+.segmented input:checked + span {
+    background-color: var(--accent);
+    color: var(--on-accent);
+    font-weight: 600;
+}
+
+.segmented input:focus-visible + span {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+}
+
+.setting-hint {
+    margin: 8px 0 0;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.settings-preview {
+    margin: 0;
+    padding: 14px;
+    border-radius: var(--radius-small);
+    background-color: var(--surface-muted);
+}
+
+.primary-button {
+    min-height: 48px;
+    padding: 10px 24px;
+    border-radius: var(--radius-small);
+    background-color: var(--accent);
+    color: var(--on-accent);
+    font-size: 1.0625rem;
+    font-weight: 600;
+}
+
+.primary-button:hover {
+    background-color: var(--accent-hover);
+}
+
 /* ---- Toast ---- */
 .toast {
     position: fixed;
@@ -349,7 +502,7 @@ h1 {
     border-radius: var(--radius-small);
     background-color: var(--text);
     color: var(--surface);
-    font-size: 15px;
+    font-size: 0.9375rem;
     text-align: center;
     opacity: 0;
     pointer-events: none;
@@ -360,6 +513,14 @@ h1 {
 .toast.visible {
     opacity: 1;
     transform: translate(-50%, 0);
+}
+
+/* Large text on narrow phones: one mood per row so words never break */
+@media (max-width: 419px) {
+    html[data-text-size="large"] .mood-grid,
+    html[data-text-size="xlarge"] .mood-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* ---- Larger screens ---- */
@@ -373,7 +534,7 @@ h1 {
     }
 
     h1 {
-        font-size: 28px;
+        font-size: 1.75rem;
     }
 
     .daily-card,
@@ -429,7 +590,7 @@ h1 {
     }
 
     .home-main .verse-text {
-        font-size: 22px;
+        font-size: 1.375rem;
     }
 
     .favorites-list {

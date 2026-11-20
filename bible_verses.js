@@ -969,6 +969,74 @@
         
         applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
         
+        // ---- Dialogs ----
+        // Native <dialog> with a plain open-attribute fallback for older browsers
+        function openDialog(dialog) {
+            if (typeof dialog.showModal === 'function') {
+                dialog.showModal();
+            } else {
+                dialog.setAttribute('open', '');
+            }
+        }
+        
+        function closeDialog(dialog) {
+            if (typeof dialog.close === 'function') {
+                dialog.close();
+            } else {
+                dialog.removeAttribute('open');
+            }
+        }
+        
+        // Clicking the dimmed backdrop closes a dialog
+        document.querySelectorAll('dialog').forEach(dialog => {
+            dialog.addEventListener('click', event => {
+                if (event.target === dialog) {
+                    closeDialog(dialog);
+                }
+            });
+        });
+        
+        // ---- Reading settings ----
+        // The inline script in index.html applies saved settings before first paint
+        const SETTINGS_KEY = 'versesGenerator.settings';
+        const settingsDialog = document.getElementById('settings-dialog');
+        const readingDefaults = { size: 'medium', font: 'default' };
+        
+        function loadReadingSettings() {
+            try {
+                const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY));
+                return Object.assign({}, readingDefaults, saved && typeof saved === 'object' ? saved : {});
+            } catch (error) {
+                return Object.assign({}, readingDefaults);
+            }
+        }
+        
+        let readingSettings = loadReadingSettings();
+        
+        function applyReadingSettings() {
+            document.documentElement.setAttribute('data-text-size', readingSettings.size);
+            document.documentElement.setAttribute('data-font', readingSettings.font);
+            settingsDialog.querySelectorAll('input[type="radio"]').forEach(input => {
+                input.checked = readingSettings[input.name] === input.value;
+            });
+        }
+        
+        settingsDialog.addEventListener('change', event => {
+            if (event.target.name in readingDefaults) {
+                readingSettings[event.target.name] = event.target.value;
+                applyReadingSettings();
+                try {
+                    localStorage.setItem(SETTINGS_KEY, JSON.stringify(readingSettings));
+                } catch (error) {
+                    // Storage unavailable: settings last for this visit only
+                }
+            }
+        });
+        
+        document.getElementById('settings-button').addEventListener('click', () => openDialog(settingsDialog));
+        
+        applyReadingSettings();
+        
         // Initial render
         showDailyVerse();
         scheduleDailyRefresh();
