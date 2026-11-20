@@ -612,6 +612,7 @@
             verseCategory.textContent = currentMood === 'all'
                 ? categoryDisplayNames[selectedVerse.category] || selectedVerse.category
                 : moods[currentMood].label;
+            updateFavoriteButtons();
             
             // Add a subtle animation
             verseText.style.opacity = '0';
@@ -665,6 +666,7 @@
             dailyText.textContent = dailyVerse.text;
             dailyReference.textContent = dailyVerse.reference;
             dailyDate.textContent = now.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
+            updateFavoriteButtons();
         }
         
         // Refresh the daily verse after midnight, including when a tab is reopened
@@ -683,8 +685,142 @@
             }
         });
         
-        showDailyVerse();
-        scheduleDailyRefresh();
+        // ---- Favorites ----
+        const FAVORITES_KEY = 'versesGenerator.favorites';
+        const favoritesList = document.getElementById('favorites-list');
+        const favoritesEmpty = document.getElementById('favorites-empty');
+        const favoritesCount = document.getElementById('favorites-count');
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const views = {
+            home: document.getElementById('view-home'),
+            favorites: document.getElementById('view-favorites')
+        };
+        
+        // Reference + text, because a few references appear with different wording
+        const verseKey = verse => verse.reference + '|' + verse.text;
+        
+        function loadFavorites() {
+            try {
+                const saved = JSON.parse(localStorage.getItem(FAVORITES_KEY));
+                return Array.isArray(saved)
+                    ? saved.filter(verse => verse && typeof verse.text === 'string' && typeof verse.reference === 'string')
+                    : [];
+            } catch (error) {
+                return [];
+            }
+        }
+        
+        let favorites = loadFavorites();
+        
+        function saveFavorites() {
+            try {
+                localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+            } catch (error) {
+                // Storage unavailable (e.g. private browsing): favorites last for this visit only
+            }
+        }
+        
+        function isFavorite(verse) {
+            return Boolean(verse) && favorites.some(saved => verseKey(saved) === verseKey(verse));
+        }
+        
+        function toggleFavorite(verse) {
+            if (isFavorite(verse)) {
+                favorites = favorites.filter(saved => verseKey(saved) !== verseKey(verse));
+            } else {
+                favorites.unshift({ text: verse.text, reference: verse.reference, category: verse.category });
+            }
+            saveFavorites();
+            renderFavorites();
+        }
+        
+        // Find the verse an action button belongs to (daily card, random card or a favorite)
+        function verseForActions(element) {
+            const actions = element.closest('.verse-actions');
+            if (actions.dataset.target === 'daily') {
+                return dailyVerse;
+            }
+            if (actions.dataset.target === 'random') {
+                return currentVerse;
+            }
+            return favorites.find(saved => verseKey(saved) === actions.dataset.key);
+        }
+        
+        function updateFavoriteButtons() {
+            document.querySelectorAll('[data-action="favorite"]').forEach(button => {
+                const saved = isFavorite(verseForActions(button));
+                button.setAttribute('aria-pressed', String(saved));
+                button.textContent = saved ? '\u2605 Saved' : '\u2606 Save';
+            });
+        }
+        
+        function createActionButton(action, label) {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'action-button';
+            button.dataset.action = action;
+            button.textContent = label;
+            return button;
+        }
+        
+        function createFavoriteItem(verse) {
+            const item = document.createElement('li');
+            item.className = 'favorite-item';
+            
+            const text = document.createElement('div');
+            text.className = 'verse-text';
+            text.textContent = verse.text;
+            
+            const reference = document.createElement('div');
+            reference.className = 'verse-reference';
+            reference.textContent = verse.reference;
+            
+            const actions = document.createElement('div');
+            actions.className = 'verse-actions';
+            actions.dataset.key = verseKey(verse);
+            actions.append(createActionButton('remove', 'Remove'));
+            
+            item.append(text, reference, actions);
+            return item;
+        }
+        
+        function renderFavorites() {
+            favoritesList.replaceChildren(...favorites.map(createFavoriteItem));
+            favoritesEmpty.hidden = favorites.length > 0;
+            favoritesCount.textContent = favorites.length;
+            updateFavoriteButtons();
+        }
+        
+        function showView(name) {
+            Object.entries(views).forEach(([key, view]) => {
+                view.hidden = key !== name;
+            });
+            tabButtons.forEach(button => {
+                const active = button.dataset.view === name;
+                button.classList.toggle('active', active);
+                button.setAttribute('aria-pressed', String(active));
+            });
+        }
+        
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => showView(button.dataset.view));
+        });
+        
+        // One listener handles every verse action button, including ones added later
+        document.addEventListener('click', event => {
+            const button = event.target.closest('[data-action]');
+            if (!button) {
+                return;
+            }
+            const verse = verseForActions(button);
+            if (!verse) {
+                return;
+            }
+            const action = button.dataset.action;
+            if (action === 'favorite' || action === 'remove') {
+                toggleFavorite(verse);
+            }
+        });
         
         // Set up event listeners
         generateButton.addEventListener('click', generateVerse);
@@ -706,5 +842,8 @@
             });
         });
         
-        // Generate a verse on page load
+        // Initial render
+        showDailyVerse();
+        scheduleDailyRefresh();
+        renderFavorites();
         generateVerse();

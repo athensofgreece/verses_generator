@@ -10,35 +10,53 @@
     <div class="container">
         <h1>Bible Verses for ADHD</h1>
         
-        <section class="daily-card" aria-labelledby="daily-heading">
-            <div class="daily-header">
-                <h2 id="daily-heading" class="daily-label">Verse of the day</h2>
-                <span class="daily-date" id="daily-date"></span>
+        <nav class="view-tabs" aria-label="Views">
+            <button type="button" class="tab-button active" id="tab-home" data-view="home" aria-pressed="true">Home</button>
+            <button type="button" class="tab-button" id="tab-favorites" data-view="favorites" aria-pressed="false">Favorites (<span id="favorites-count">0</span>)</button>
+        </nav>
+        
+        <main id="view-home">
+            <section class="daily-card" aria-labelledby="daily-heading">
+                <div class="daily-header">
+                    <h2 id="daily-heading" class="daily-label">Verse of the day</h2>
+                    <span class="daily-date" id="daily-date"></span>
+                </div>
+                <div class="verse-text" id="daily-text"></div>
+                <div class="verse-reference" id="daily-reference"></div>
+                <div class="verse-actions" data-target="daily">
+                    <button type="button" class="action-button" data-action="favorite" aria-pressed="false">&#9734; Save</button>
+                </div>
+            </section>
+            
+            <section class="mood-section" aria-labelledby="mood-heading">
+                <h2 id="mood-heading" class="section-title">How are you feeling?</h2>
+                <div class="mood-grid" role="group" aria-labelledby="mood-heading">
+                    <button type="button" class="mood-button" data-mood="distracted" aria-pressed="false">Distracted</button>
+                    <button type="button" class="mood-button" data-mood="anxious" aria-pressed="false">Anxious</button>
+                    <button type="button" class="mood-button" data-mood="overwhelmed" aria-pressed="false">Overwhelmed</button>
+                    <button type="button" class="mood-button" data-mood="strength" aria-pressed="false">Need Strength</button>
+                    <button type="button" class="mood-button" data-mood="hope" aria-pressed="false">Need Hope</button>
+                    <button type="button" class="mood-button" data-mood="direction" aria-pressed="false">Need Direction</button>
+                    <button type="button" class="mood-button mood-any active" data-mood="all" aria-pressed="true">Any verse</button>
+                </div>
+            </section>
+            
+            <div class="verse-box">
+                <div class="category" id="verse-category">Any verse</div>
+                <div class="verse-text" id="verse-text">Click the button below to generate a Bible verse.</div>
+                <div class="verse-reference" id="verse-reference"></div>
+                <div class="verse-actions" data-target="random">
+                    <button type="button" class="action-button" data-action="favorite" aria-pressed="false">&#9734; Save</button>
+                </div>
             </div>
-            <div class="verse-text" id="daily-text"></div>
-            <div class="verse-reference" id="daily-reference"></div>
+            
+            <button id="generate-button">New Verse</button>
+        </main>
+        
+        <section id="view-favorites" aria-label="Favorite verses" hidden>
+            <p class="favorites-empty" id="favorites-empty">No favorites yet. Tap &#9734; Save on any verse to keep it here.</p>
+            <ul class="favorites-list" id="favorites-list"></ul>
         </section>
-        
-        <section class="mood-section" aria-labelledby="mood-heading">
-            <h2 id="mood-heading" class="section-title">How are you feeling?</h2>
-            <div class="mood-grid" role="group" aria-labelledby="mood-heading">
-                <button type="button" class="mood-button" data-mood="distracted" aria-pressed="false">Distracted</button>
-                <button type="button" class="mood-button" data-mood="anxious" aria-pressed="false">Anxious</button>
-                <button type="button" class="mood-button" data-mood="overwhelmed" aria-pressed="false">Overwhelmed</button>
-                <button type="button" class="mood-button" data-mood="strength" aria-pressed="false">Need Strength</button>
-                <button type="button" class="mood-button" data-mood="hope" aria-pressed="false">Need Hope</button>
-                <button type="button" class="mood-button" data-mood="direction" aria-pressed="false">Need Direction</button>
-                <button type="button" class="mood-button mood-any active" data-mood="all" aria-pressed="true">Any verse</button>
-            </div>
-        </section>
-        
-        <div class="verse-box">
-            <div class="category" id="verse-category">Any verse</div>
-            <div class="verse-text" id="verse-text">Click the button below to generate a Bible verse.</div>
-            <div class="verse-reference" id="verse-reference"></div>
-        </div>
-        
-        <button id="generate-button">New Verse</button>
     </div>
 
     <script src="bible_verses.js"></script> <!-- Link to external JavaScript file -->
