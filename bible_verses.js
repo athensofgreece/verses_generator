@@ -1469,6 +1469,40 @@
             journalEmpty.hidden = journal.length > 0;
         }
         
+        // ---- Installable offline app ----
+        const installGroup = document.getElementById('install-group');
+        let installPrompt = null;
+        
+        if ('serviceWorker' in navigator && window.isSecureContext) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(() => {
+                    // Offline support is optional; the site works without it
+                });
+            });
+        }
+        
+        // Browsers that support installing show an "Install app" button in settings
+        window.addEventListener('beforeinstallprompt', event => {
+            event.preventDefault();
+            installPrompt = event;
+            installGroup.hidden = false;
+        });
+        
+        window.addEventListener('appinstalled', () => {
+            installPrompt = null;
+            installGroup.hidden = true;
+        });
+        
+        document.getElementById('install-button').addEventListener('click', () => {
+            if (installPrompt) {
+                installPrompt.prompt();
+                installPrompt.userChoice.finally(() => {
+                    installPrompt = null;
+                    installGroup.hidden = true;
+                });
+            }
+        });
+        
         // Initial render
         showDailyVerse();
         scheduleDailyRefresh();

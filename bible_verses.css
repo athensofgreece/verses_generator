@@ -685,6 +685,11 @@ h1 {
     outline-offset: 2px;
 }
 
+.install-group .secondary-button {
+    width: 100%;
+    color: var(--text);
+}
+
 .journal-note + .setting-hint {
     margin-top: -10px;
 }

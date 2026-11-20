@@ -6,6 +6,10 @@
     <meta name="description" content="A calm, ADHD-friendly Bible verse companion: pick how you feel, get a verse, save your favorites.">
     <meta name="theme-color" content="#4a6fa5">
     <title>ADHD-Friendly Bible Verse Generator</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-title" content="Verses">
+    <meta name="mobile-web-app-capable" content="yes">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%234a6fa5'/%3E%3Cpath d='M50 20v60M30 40h40' stroke='white' stroke-width='10' stroke-linecap='round'/%3E%3C/svg%3E">
     <script>
         // Apply the saved (or system) theme and reading settings before first paint to avoid a flash
@@ -155,6 +159,10 @@
                 <p class="setting-hint">Easy-read uses a wide, dyslexia-friendly font with extra letter and line spacing.</p>
             </fieldset>
             <div class="settings-preview verse-text">The LORD is my shepherd; I shall not want.</div>
+            <div class="install-group" id="install-group" hidden>
+                <button type="button" class="secondary-button" id="install-button">Install app</button>
+                <p class="setting-hint">Adds Verses to your home screen or desktop. It also works offline.</p>
+            </div>
             <button type="submit" class="primary-button">Done</button>
         </form>
     </dialog>
