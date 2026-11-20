@@ -604,6 +604,9 @@
         
         // Generate a random verse for the selected mood
         function generateVerse() {
+            if (speakingButton && verseBox.contains(speakingButton)) {
+                stopSpeaking();
+            }
             const selectedVerse = pickRandomVerse(versesForMood(currentMood), currentVerse);
             currentVerse = selectedVerse;
             
@@ -673,6 +676,7 @@
             dailyReference.textContent = dailyVerse.reference;
             dailyDate.textContent = now.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
             updateFavoriteButtons();
+            renderCheckins();
         }
         
         // Refresh the daily verse after midnight, including when a tab is reopened
@@ -699,6 +703,7 @@
         const tabButtons = document.querySelectorAll('.tab-button');
         const views = {
             home: document.getElementById('view-home'),
+            journal: document.getElementById('view-journal'),
             favorites: document.getElementById('view-favorites')
         };
         
@@ -749,6 +754,9 @@
             if (actions.dataset.target === 'random') {
                 return currentVerse;
             }
+            if (actions.dataset.target === 'journal') {
+                return journal.find(entry => verseKey(entry) === actions.dataset.key);
+            }
             return favorites.find(saved => verseKey(saved) === actions.dataset.key);
         }
         
@@ -766,6 +774,9 @@
             button.className = 'action-button';
             button.dataset.action = action;
             button.textContent = label;
+            if (action === 'listen') {
+                button.setAttribute('aria-pressed', 'false');
+            }
             return button;
         }
         
@@ -787,6 +798,8 @@
             actions.append(
                 createActionButton('copy', 'Copy'),
                 createActionButton('share', 'Share'),
+                createActionButton('listen', '\u25B6 Listen'),
+                createActionButton('reflect', '\u270E Reflect'),
                 createActionButton('remove', 'Remove')
             );
             
@@ -821,6 +834,14 @@
             if (event.key === FAVORITES_KEY || event.key === null) {
                 favorites = loadFavorites();
                 renderFavorites();
+            }
+            if (event.key === CHECKINS_KEY || event.key === null) {
+                checkins = loadCheckins();
+                renderCheckins();
+            }
+            if (event.key === JOURNAL_KEY || event.key === null) {
+                journal = loadJournal();
+                renderJournal();
             }
         });
         
@@ -885,6 +906,57 @@
             showToast(copied ? 'Sharing isn\u2019t available here, so the verse was copied' : 'Could not share or copy this verse.');
         }
         
+        // ---- Read aloud ----
+        const canSpeak = Boolean(window.speechSynthesis && window.SpeechSynthesisUtterance);
+        let speakingButton = null;
+        
+        if (!canSpeak) {
+            document.documentElement.classList.add('no-speech');
+        }
+        
+        // "Psalm 34:4" reads as "Psalm chapter 34, verse 4" instead of a time
+        function spokenReference(reference) {
+            return reference.replace(/(\d+):(\d+)(?:-(\d+))?/, (match, chapter, first, last) =>
+                'chapter ' + chapter + ', ' + (last ? 'verses ' + first + ' to ' + last : 'verse ' + first)
+            );
+        }
+        
+        function resetListenButton() {
+            if (speakingButton) {
+                speakingButton.textContent = '\u25B6 Listen';
+                speakingButton.setAttribute('aria-pressed', 'false');
+                speakingButton = null;
+            }
+        }
+        
+        function stopSpeaking() {
+            if (canSpeak) {
+                window.speechSynthesis.cancel();
+            }
+            resetListenButton();
+        }
+        
+        // Tapping Listen again (now "Stop") stops reading
+        function speakVerse(verse, button) {
+            const wasSpeaking = speakingButton === button;
+            stopSpeaking();
+            if (wasSpeaking || !canSpeak) {
+                return;
+            }
+            const utterance = new SpeechSynthesisUtterance(verse.text + ' ' + spokenReference(verse.reference));
+            utterance.lang = 'en-US';
+            utterance.rate = 0.9;
+            utterance.onend = utterance.onerror = () => {
+                if (speakingButton === button) {
+                    resetListenButton();
+                }
+            };
+            speakingButton = button;
+            button.textContent = '\u25A0 Stop';
+            button.setAttribute('aria-pressed', 'true');
+            window.speechSynthesis.speak(utterance);
+        }
+        
         // One listener handles every verse action button, including ones added later
         document.addEventListener('click', event => {
             const button = event.target.closest('[data-action]');
@@ -902,6 +974,12 @@
                 copyVerse(verse);
             } else if (action === 'share') {
                 shareVerse(verse);
+            } else if (action === 'listen') {
+                speakVerse(verse, button);
+            } else if (action === 'reflect') {
+                openJournal(verse);
+            } else if (action === 'delete-note') {
+                deleteJournalEntry(verse);
             }
         });
         
@@ -969,8 +1047,465 @@
         
         applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
         
+        // ---- Dialogs ----
+        // Native <dialog> with a plain open-attribute fallback for older browsers
+        function openDialog(dialog) {
+            if (typeof dialog.showModal === 'function') {
+                dialog.showModal();
+            } else {
+                dialog.setAttribute('open', '');
+            }
+        }
+        
+        function closeDialog(dialog) {
+            if (typeof dialog.close === 'function') {
+                dialog.close();
+            } else {
+                dialog.removeAttribute('open');
+            }
+        }
+        
+        // Clicking the dimmed backdrop closes a dialog
+        document.querySelectorAll('dialog').forEach(dialog => {
+            dialog.addEventListener('click', event => {
+                if (event.target === dialog) {
+                    closeDialog(dialog);
+                }
+            });
+        });
+        
+        // ---- Reading settings ----
+        // The inline script in index.html applies saved settings before first paint
+        const SETTINGS_KEY = 'versesGenerator.settings';
+        const settingsDialog = document.getElementById('settings-dialog');
+        const readingDefaults = { size: 'medium', font: 'default' };
+        
+        function loadReadingSettings() {
+            try {
+                const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY));
+                return Object.assign({}, readingDefaults, saved && typeof saved === 'object' ? saved : {});
+            } catch (error) {
+                return Object.assign({}, readingDefaults);
+            }
+        }
+        
+        let readingSettings = loadReadingSettings();
+        
+        function applyReadingSettings() {
+            document.documentElement.setAttribute('data-text-size', readingSettings.size);
+            document.documentElement.setAttribute('data-font', readingSettings.font);
+            settingsDialog.querySelectorAll('input[type="radio"]').forEach(input => {
+                input.checked = readingSettings[input.name] === input.value;
+            });
+        }
+        
+        settingsDialog.addEventListener('change', event => {
+            if (event.target.name in readingDefaults) {
+                readingSettings[event.target.name] = event.target.value;
+                applyReadingSettings();
+                try {
+                    localStorage.setItem(SETTINGS_KEY, JSON.stringify(readingSettings));
+                } catch (error) {
+                    // Storage unavailable: settings last for this visit only
+                }
+            }
+        });
+        
+        document.getElementById('settings-button').addEventListener('click', () => openDialog(settingsDialog));
+        
+        applyReadingSettings();
+        
+        // ---- Breathing pause ----
+        const BREATH_IN_SECONDS = 4;
+        const BREATH_CYCLE_SECONDS = 10;
+        const pauseDialog = document.getElementById('pause-dialog');
+        const pauseTimer = document.getElementById('pause-timer');
+        const breathCue = document.getElementById('breath-cue');
+        const pauseStop = document.getElementById('pause-stop');
+        let pauseInterval = null;
+        let pauseEndsAt = 0;
+        let pauseStartedAt = 0;
+        let wakeLock = null;
+        
+        function formatSeconds(totalSeconds) {
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            return minutes + ':' + String(seconds).padStart(2, '0');
+        }
+        
+        // Keep the screen on during a pause where supported
+        async function keepScreenOn() {
+            try {
+                if (navigator.wakeLock) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                }
+            } catch (error) {
+                wakeLock = null;
+            }
+        }
+        
+        function releaseScreen() {
+            if (wakeLock) {
+                wakeLock.release().catch(() => {});
+                wakeLock = null;
+            }
+        }
+        
+        function stopPauseTimer() {
+            clearInterval(pauseInterval);
+            pauseInterval = null;
+            releaseScreen();
+        }
+        
+        function finishPause() {
+            stopPauseTimer();
+            pauseTimer.textContent = formatSeconds(0);
+            breathCue.textContent = 'Well done. Take this peace with you.';
+            pauseDialog.classList.add('finished');
+            pauseStop.textContent = 'Close';
+            checkIn();
+        }
+        
+        function updatePause() {
+            const now = Date.now();
+            const left = Math.max(0, Math.ceil((pauseEndsAt - now) / 1000));
+            pauseTimer.textContent = formatSeconds(left);
+            if (left === 0) {
+                finishPause();
+                return;
+            }
+            const elapsed = ((now - pauseStartedAt) / 1000) % BREATH_CYCLE_SECONDS;
+            breathCue.textContent = elapsed < BREATH_IN_SECONDS ? 'Breathe in' : 'Breathe out';
+        }
+        
+        function startPause(minutes) {
+            const verse = currentVerse || dailyVerse;
+            document.getElementById('pause-text').textContent = verse.text;
+            document.getElementById('pause-reference').textContent = verse.reference;
+            pauseDialog.classList.remove('finished');
+            pauseStop.textContent = 'End pause';
+            pauseStartedAt = Date.now();
+            pauseEndsAt = pauseStartedAt + minutes * 60000;
+            stopPauseTimer();
+            updatePause();
+            pauseInterval = setInterval(updatePause, 250);
+            keepScreenOn();
+            openDialog(pauseDialog);
+        }
+        
+        document.querySelectorAll('.pause-option').forEach(button => {
+            button.addEventListener('click', () => startPause(Number(button.dataset.minutes)));
+        });
+        
+        pauseStop.addEventListener('click', () => closeDialog(pauseDialog));
+        pauseDialog.addEventListener('close', stopPauseTimer);
+        
+        // ---- Gentle daily check-in ----
+        const CHECKINS_KEY = 'versesGenerator.checkins';
+        const CHECKIN_HISTORY_DAYS = 14;
+        const checkinButton = document.getElementById('checkin-button');
+        const checkinMessage = document.getElementById('checkin-message');
+        const checkinSummary = document.getElementById('checkin-summary');
+        const checkinDays = document.getElementById('checkin-days');
+        
+        function localDateKey(date) {
+            return date.getFullYear() + '-' +
+                String(date.getMonth() + 1).padStart(2, '0') + '-' +
+                String(date.getDate()).padStart(2, '0');
+        }
+        
+        function daysAgo(count) {
+            const now = new Date();
+            return new Date(now.getFullYear(), now.getMonth(), now.getDate() - count);
+        }
+        
+        function loadCheckins() {
+            try {
+                const saved = JSON.parse(localStorage.getItem(CHECKINS_KEY));
+                return Array.isArray(saved)
+                    ? saved.filter(day => typeof day === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(day))
+                    : [];
+            } catch (error) {
+                return [];
+            }
+        }
+        
+        let checkins = loadCheckins();
+        
+        function saveCheckins() {
+            checkins = Array.from(new Set(checkins)).sort().slice(-400);
+            try {
+                localStorage.setItem(CHECKINS_KEY, JSON.stringify(checkins));
+            } catch (error) {
+                // Storage unavailable: check-ins last for this visit only
+            }
+        }
+        
+        function isCheckedIn(date) {
+            return checkins.includes(localDateKey(date));
+        }
+        
+        function currentRun() {
+            let run = 0;
+            while (isCheckedIn(daysAgo(run))) {
+                run++;
+            }
+            return run;
+        }
+        
+        // Finishing a pause or saving a note also counts as today's check-in
+        function checkIn() {
+            checkins = loadCheckins();
+            if (!isCheckedIn(new Date())) {
+                checkins.push(localDateKey(new Date()));
+                saveCheckins();
+            }
+            renderCheckins();
+        }
+        
+        function undoCheckIn() {
+            const today = localDateKey(new Date());
+            checkins = loadCheckins().filter(day => day !== today);
+            saveCheckins();
+            renderCheckins();
+        }
+        
+        // Only ever celebrates what was done; missed days are never counted or mentioned
+        function renderCheckins() {
+            const checkedToday = isCheckedIn(new Date());
+            const run = currentRun();
+            
+            checkinButton.setAttribute('aria-pressed', String(checkedToday));
+            checkinButton.textContent = checkedToday ? '\u2713 Checked in today' : 'Check in for today';
+            if (!checkedToday) {
+                checkinMessage.textContent = 'Spent a moment with God today? Mark it here.';
+            } else if (run > 1) {
+                checkinMessage.textContent = run + ' days in a row. Lovely.';
+            } else {
+                checkinMessage.textContent = 'Checked in for today. See you tomorrow.';
+            }
+            checkinSummary.textContent = checkins.length
+                ? checkins.length + (checkins.length === 1 ? ' day' : ' days') + ' so far'
+                : '';
+            
+            const days = [];
+            for (let count = CHECKIN_HISTORY_DAYS - 1; count >= 0; count--) {
+                const date = daysAgo(count);
+                const done = isCheckedIn(date);
+                const day = document.createElement('li');
+                day.className = 'checkin-day' + (done ? ' done' : '') + (count === 0 ? ' today' : '');
+                day.textContent = date.getDate();
+                day.title = date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }) +
+                    (done ? ': checked in' : '');
+                day.setAttribute('aria-label', day.title);
+                days.push(day);
+            }
+            checkinDays.replaceChildren(...days);
+        }
+        
+        checkinButton.addEventListener('click', () => {
+            if (checkinButton.getAttribute('aria-pressed') === 'true') {
+                undoCheckIn();
+                showToast('Check-in removed');
+            } else {
+                checkIn();
+            }
+        });
+        
+        // ---- Reflection journal ----
+        const JOURNAL_KEY = 'versesGenerator.journal';
+        const journalDialog = document.getElementById('journal-dialog');
+        const journalNote = document.getElementById('journal-note');
+        const journalPrompt = document.getElementById('journal-prompt');
+        const journalDelete = document.getElementById('journal-delete');
+        const journalList = document.getElementById('journal-list');
+        const journalEmpty = document.getElementById('journal-empty');
+        const reflectionPrompts = [
+            'What is one word from this verse you want to carry today?',
+            'How does this verse speak to how you feel right now?',
+            'What is one small step this verse invites you to take?',
+            'What would change if you believed this today?',
+            'Who could you share this encouragement with?',
+            'What do you want to tell God about this?',
+            'Where do you need this verse most this week?',
+            'What feels hard to believe here, and why?'
+        ];
+        let journalVerse = null;
+        
+        function loadJournal() {
+            try {
+                const saved = JSON.parse(localStorage.getItem(JOURNAL_KEY));
+                return Array.isArray(saved)
+                    ? saved.filter(entry => entry && typeof entry.reference === 'string' && typeof entry.note === 'string')
+                    : [];
+            } catch (error) {
+                return [];
+            }
+        }
+        
+        let journal = loadJournal();
+        
+        function saveJournal() {
+            try {
+                localStorage.setItem(JOURNAL_KEY, JSON.stringify(journal));
+            } catch (error) {
+                // Storage unavailable: notes last for this visit only
+            }
+        }
+        
+        // The same verse always gets the same prompt
+        function promptFor(verse) {
+            let hash = 0;
+            for (const character of verseKey(verse)) {
+                hash = (hash * 31 + character.charCodeAt(0)) >>> 0;
+            }
+            return reflectionPrompts[hash % reflectionPrompts.length];
+        }
+        
+        function journalEntryFor(verse) {
+            return journal.find(entry => verseKey(entry) === verseKey(verse));
+        }
+        
+        function openJournal(verse) {
+            const entry = journalEntryFor(verse);
+            journalVerse = { text: verse.text, reference: verse.reference, category: verse.category };
+            document.getElementById('journal-verse-text').textContent = verse.text;
+            document.getElementById('journal-verse-reference').textContent = verse.reference;
+            journalPrompt.textContent = entry ? entry.prompt : promptFor(verse);
+            journalNote.value = entry ? entry.note : '';
+            journalDelete.hidden = !entry;
+            openDialog(journalDialog);
+            journalNote.focus();
+        }
+        
+        // Closing the dialog in any way (Done, X, Escape, backdrop) saves the note
+        function saveJournalNote() {
+            if (!journalVerse) {
+                return;
+            }
+            const verse = journalVerse;
+            const note = journalNote.value.trim();
+            journalVerse = null;
+            journal = loadJournal().filter(entry => verseKey(entry) !== verseKey(verse));
+            if (note) {
+                journal.unshift(Object.assign({}, verse, {
+                    note: note,
+                    prompt: journalPrompt.textContent,
+                    updatedAt: new Date().toISOString()
+                }));
+            }
+            saveJournal();
+            renderJournal();
+            if (note) {
+                showToast('Note saved');
+                checkIn();
+            }
+        }
+        
+        function deleteJournalEntry(verse) {
+            if (!window.confirm('Delete this note? This can\u2019t be undone.')) {
+                return false;
+            }
+            journal = loadJournal().filter(entry => verseKey(entry) !== verseKey(verse));
+            saveJournal();
+            renderJournal();
+            showToast('Note deleted');
+            return true;
+        }
+        
+        // submit and cancel fire before the dialog closes, so the note is stored right away
+        journalDialog.addEventListener('submit', saveJournalNote);
+        journalDialog.addEventListener('cancel', saveJournalNote);
+        journalDialog.addEventListener('close', saveJournalNote);
+        
+        journalDelete.addEventListener('click', () => {
+            const verse = journalVerse;
+            if (verse && deleteJournalEntry(verse)) {
+                journalVerse = null;
+                closeDialog(journalDialog);
+            }
+        });
+        
+        function createJournalItem(entry) {
+            const item = document.createElement('li');
+            item.className = 'favorite-item journal-item';
+            
+            const date = document.createElement('p');
+            date.className = 'journal-date';
+            date.textContent = new Date(entry.updatedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+            
+            const text = document.createElement('div');
+            text.className = 'verse-text';
+            text.textContent = entry.text;
+            
+            const reference = document.createElement('div');
+            reference.className = 'verse-reference';
+            reference.textContent = entry.reference;
+            
+            const prompt = document.createElement('p');
+            prompt.className = 'journal-item-prompt';
+            prompt.textContent = entry.prompt;
+            
+            const note = document.createElement('p');
+            note.className = 'journal-item-note';
+            note.textContent = entry.note;
+            
+            const actions = document.createElement('div');
+            actions.className = 'verse-actions';
+            actions.dataset.target = 'journal';
+            actions.dataset.key = verseKey(entry);
+            actions.append(
+                createActionButton('reflect', '\u270E Edit'),
+                createActionButton('listen', '\u25B6 Listen'),
+                createActionButton('delete-note', 'Delete')
+            );
+            
+            item.append(date, text, reference, prompt, note, actions);
+            return item;
+        }
+        
+        function renderJournal() {
+            journalList.replaceChildren(...journal.map(createJournalItem));
+            journalEmpty.hidden = journal.length > 0;
+        }
+        
+        // ---- Installable offline app ----
+        const installGroup = document.getElementById('install-group');
+        let installPrompt = null;
+        
+        if ('serviceWorker' in navigator && window.isSecureContext) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(() => {
+                    // Offline support is optional; the site works without it
+                });
+            });
+        }
+        
+        // Browsers that support installing show an "Install app" button in settings
+        window.addEventListener('beforeinstallprompt', event => {
+            event.preventDefault();
+            installPrompt = event;
+            installGroup.hidden = false;
+        });
+        
+        window.addEventListener('appinstalled', () => {
+            installPrompt = null;
+            installGroup.hidden = true;
+        });
+        
+        document.getElementById('install-button').addEventListener('click', () => {
+            if (installPrompt) {
+                installPrompt.prompt();
+                installPrompt.userChoice.finally(() => {
+                    installPrompt = null;
+                    installGroup.hidden = true;
+                });
+            }
+        });
+        
         // Initial render
         showDailyVerse();
         scheduleDailyRefresh();
         renderFavorites();
+        renderJournal();
         generateVerse();

@@ -6,9 +6,13 @@
     <meta name="description" content="A calm, ADHD-friendly Bible verse companion: pick how you feel, get a verse, save your favorites.">
     <meta name="theme-color" content="#4a6fa5">
     <title>ADHD-Friendly Bible Verse Generator</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-title" content="Verses">
+    <meta name="mobile-web-app-capable" content="yes">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%234a6fa5'/%3E%3Cpath d='M50 20v60M30 40h40' stroke='white' stroke-width='10' stroke-linecap='round'/%3E%3C/svg%3E">
     <script>
-        // Apply the saved (or system) theme before first paint to avoid a flash
+        // Apply the saved (or system) theme and reading settings before first paint to avoid a flash
         (function () {
             var theme = null;
             try {
@@ -18,6 +22,15 @@
                 theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
             }
             document.documentElement.setAttribute('data-theme', theme);
+            try {
+                var reading = JSON.parse(localStorage.getItem('versesGenerator.settings')) || {};
+                if (reading.size) {
+                    document.documentElement.setAttribute('data-text-size', reading.size);
+                }
+                if (reading.font) {
+                    document.documentElement.setAttribute('data-font', reading.font);
+                }
+            } catch (error) {}
         })();
     </script>
     <link rel="stylesheet" href="bible_verses.css"> <!-- Link to external CSS file -->
@@ -29,61 +42,162 @@
                 <h1>Bible Verses for ADHD</h1>
                 <p class="subtitle">A calm verse for whatever you're feeling.</p>
             </div>
-            <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Switch to dark mode" title="Switch to dark mode">&#9790;</button>
+            <div class="header-actions">
+                <button type="button" class="icon-button settings-button" id="settings-button" aria-haspopup="dialog" aria-label="Reading settings" title="Reading settings">Aa</button>
+                <button type="button" class="icon-button" id="theme-toggle" aria-label="Switch to dark mode" title="Switch to dark mode">&#9790;</button>
+            </div>
         </header>
         
         <nav class="view-tabs" aria-label="Views">
             <button type="button" class="tab-button active" id="tab-home" data-view="home" aria-pressed="true">Home</button>
+            <button type="button" class="tab-button" id="tab-journal" data-view="journal" aria-pressed="false">Journal</button>
             <button type="button" class="tab-button" id="tab-favorites" data-view="favorites" aria-pressed="false">Favorites (<span id="favorites-count">0</span>)</button>
         </nav>
         
-        <main id="view-home">
-            <section class="daily-card" aria-labelledby="daily-heading">
-                <div class="daily-header">
-                    <h2 id="daily-heading" class="daily-label">Verse of the day</h2>
-                    <span class="daily-date" id="daily-date"></span>
-                </div>
-                <div class="verse-text" id="daily-text"></div>
-                <div class="verse-reference" id="daily-reference"></div>
-                <div class="verse-actions" data-target="daily">
-                    <button type="button" class="action-button" data-action="favorite" aria-pressed="false">&#9734; Save</button>
-                    <button type="button" class="action-button" data-action="copy">Copy</button>
-                    <button type="button" class="action-button" data-action="share">Share</button>
-                </div>
-            </section>
-            
-            <section class="mood-section" aria-labelledby="mood-heading">
-                <h2 id="mood-heading" class="section-title">How are you feeling?</h2>
-                <div class="mood-grid" role="group" aria-labelledby="mood-heading">
-                    <button type="button" class="mood-button" data-mood="distracted" aria-pressed="false">Distracted</button>
-                    <button type="button" class="mood-button" data-mood="anxious" aria-pressed="false">Anxious</button>
-                    <button type="button" class="mood-button" data-mood="overwhelmed" aria-pressed="false">Overwhelmed</button>
-                    <button type="button" class="mood-button" data-mood="strength" aria-pressed="false">Need Strength</button>
-                    <button type="button" class="mood-button" data-mood="hope" aria-pressed="false">Need Hope</button>
-                    <button type="button" class="mood-button" data-mood="direction" aria-pressed="false">Need Direction</button>
-                    <button type="button" class="mood-button mood-any active" data-mood="all" aria-pressed="true">Any verse</button>
-                </div>
-            </section>
-            
-            <div class="verse-box">
-                <div class="category" id="verse-category">Any verse</div>
-                <div class="verse-text" id="verse-text">Click the button below to generate a Bible verse.</div>
-                <div class="verse-reference" id="verse-reference"></div>
-                <div class="verse-actions" data-target="random">
-                    <button type="button" class="action-button" data-action="favorite" aria-pressed="false">&#9734; Save</button>
-                    <button type="button" class="action-button" data-action="copy">Copy</button>
-                    <button type="button" class="action-button" data-action="share">Share</button>
-                </div>
+        <main id="view-home" class="home-layout">
+            <div class="home-side">
+                <section class="daily-card" aria-labelledby="daily-heading">
+                    <div class="daily-header">
+                        <h2 id="daily-heading" class="daily-label">Verse of the day</h2>
+                        <span class="daily-date" id="daily-date"></span>
+                    </div>
+                    <div class="verse-text" id="daily-text"></div>
+                    <div class="verse-reference" id="daily-reference"></div>
+                    <div class="verse-actions" data-target="daily">
+                        <button type="button" class="action-button" data-action="favorite" aria-pressed="false">&#9734; Save</button>
+                        <button type="button" class="action-button" data-action="copy">Copy</button>
+                        <button type="button" class="action-button" data-action="share">Share</button>
+                        <button type="button" class="action-button" data-action="listen" aria-pressed="false">&#9654; Listen</button>
+                        <button type="button" class="action-button" data-action="reflect">&#9998; Reflect</button>
+                    </div>
+                </section>
+                
+                <section class="checkin-card" aria-labelledby="checkin-heading">
+                    <div class="daily-header">
+                        <h2 id="checkin-heading" class="daily-label">Daily check-in</h2>
+                        <span class="daily-date" id="checkin-summary"></span>
+                    </div>
+                    <p class="checkin-message" id="checkin-message" aria-live="polite"></p>
+                    <button type="button" class="primary-button checkin-button" id="checkin-button" aria-pressed="false">Check in for today</button>
+                    <ol class="checkin-days" id="checkin-days" aria-label="Last 14 days"></ol>
+                </section>
             </div>
             
-            <button type="button" id="generate-button">New Verse</button>
+            <div class="home-main">
+                <section class="mood-section" aria-labelledby="mood-heading">
+                    <h2 id="mood-heading" class="section-title">How are you feeling?</h2>
+                    <div class="mood-grid" role="group" aria-labelledby="mood-heading">
+                        <button type="button" class="mood-button" data-mood="distracted" aria-pressed="false">Distracted</button>
+                        <button type="button" class="mood-button" data-mood="anxious" aria-pressed="false">Anxious</button>
+                        <button type="button" class="mood-button" data-mood="overwhelmed" aria-pressed="false">Overwhelmed</button>
+                        <button type="button" class="mood-button" data-mood="strength" aria-pressed="false">Need Strength</button>
+                        <button type="button" class="mood-button" data-mood="hope" aria-pressed="false">Need Hope</button>
+                        <button type="button" class="mood-button" data-mood="direction" aria-pressed="false">Need Direction</button>
+                        <button type="button" class="mood-button mood-any active" data-mood="all" aria-pressed="true">Any verse</button>
+                    </div>
+                </section>
+            
+                <div class="verse-box">
+                    <div class="category" id="verse-category">Any verse</div>
+                    <div class="verse-text" id="verse-text">Click the button below to generate a Bible verse.</div>
+                    <div class="verse-reference" id="verse-reference"></div>
+                    <div class="verse-actions" data-target="random">
+                        <button type="button" class="action-button" data-action="favorite" aria-pressed="false">&#9734; Save</button>
+                        <button type="button" class="action-button" data-action="copy">Copy</button>
+                        <button type="button" class="action-button" data-action="share">Share</button>
+                        <button type="button" class="action-button" data-action="listen" aria-pressed="false">&#9654; Listen</button>
+                        <button type="button" class="action-button" data-action="reflect">&#9998; Reflect</button>
+                    </div>
+                </div>
+                
+                <button type="button" id="generate-button">New Verse</button>
+                
+                <section class="pause-card" aria-labelledby="pause-heading">
+                    <h2 id="pause-heading" class="section-title">Take a breathing pause</h2>
+                    <p class="pause-hint">Breathe slowly with the verse above.</p>
+                    <div class="pause-options" role="group" aria-labelledby="pause-heading">
+                        <button type="button" class="pause-option" data-minutes="1">1 min</button>
+                        <button type="button" class="pause-option" data-minutes="3">3 min</button>
+                        <button type="button" class="pause-option" data-minutes="5">5 min</button>
+                    </div>
+                </section>
+            </div>
         </main>
+        
+        <section id="view-journal" aria-label="Journal" hidden>
+            <p class="favorites-empty" id="journal-empty">No reflections yet. Tap &#9998; Reflect on any verse to write a few words.</p>
+            <ul class="favorites-list" id="journal-list"></ul>
+        </section>
         
         <section id="view-favorites" aria-label="Favorite verses" hidden>
             <p class="favorites-empty" id="favorites-empty">No favorites yet. Tap &#9734; Save on any verse to keep it here.</p>
             <ul class="favorites-list" id="favorites-list"></ul>
         </section>
     </div>
+    
+    <dialog class="sheet" id="settings-dialog" aria-labelledby="settings-title">
+        <form method="dialog" class="sheet-body">
+            <div class="sheet-header">
+                <h2 id="settings-title">Reading settings</h2>
+                <button type="submit" class="icon-button" aria-label="Close settings" title="Close">&times;</button>
+            </div>
+            <fieldset class="setting-group">
+                <legend>Text size</legend>
+                <div class="segmented">
+                    <label><input type="radio" name="size" value="small"><span>Small</span></label>
+                    <label><input type="radio" name="size" value="medium"><span>Default</span></label>
+                    <label><input type="radio" name="size" value="large"><span>Large</span></label>
+                    <label><input type="radio" name="size" value="xlarge"><span>Extra large</span></label>
+                </div>
+            </fieldset>
+            <fieldset class="setting-group">
+                <legend>Font</legend>
+                <div class="segmented">
+                    <label><input type="radio" name="font" value="default"><span>Standard</span></label>
+                    <label><input type="radio" name="font" value="readable"><span>Easy-read</span></label>
+                </div>
+                <p class="setting-hint">Easy-read uses a wide, dyslexia-friendly font with extra letter and line spacing.</p>
+            </fieldset>
+            <div class="settings-preview verse-text">The LORD is my shepherd; I shall not want.</div>
+            <div class="install-group" id="install-group" hidden>
+                <button type="button" class="secondary-button" id="install-button">Install app</button>
+                <p class="setting-hint">Adds Verses to your home screen or desktop. It also works offline.</p>
+            </div>
+            <button type="submit" class="primary-button">Done</button>
+        </form>
+    </dialog>
+    
+    <dialog class="sheet pause-sheet" id="pause-dialog" aria-labelledby="pause-title">
+        <div class="sheet-body pause-body">
+            <h2 id="pause-title" class="daily-label">Breathing pause</h2>
+            <div class="breath-circle" aria-hidden="true"></div>
+            <p class="breath-cue" id="breath-cue">Breathe in</p>
+            <div class="verse-text" id="pause-text"></div>
+            <div class="verse-reference" id="pause-reference"></div>
+            <div class="pause-timer" id="pause-timer" role="timer" aria-label="Time left">1:00</div>
+            <button type="button" class="primary-button" id="pause-stop">End pause</button>
+        </div>
+    </dialog>
+    
+    <dialog class="sheet" id="journal-dialog" aria-labelledby="journal-title">
+        <form method="dialog" class="sheet-body">
+            <div class="sheet-header">
+                <h2 id="journal-title">Reflect</h2>
+                <button type="submit" class="icon-button" aria-label="Save and close" title="Save and close">&times;</button>
+            </div>
+            <div class="journal-verse">
+                <div class="verse-text" id="journal-verse-text"></div>
+                <div class="verse-reference" id="journal-verse-reference"></div>
+            </div>
+            <label class="journal-prompt" for="journal-note" id="journal-prompt"></label>
+            <textarea class="journal-note" id="journal-note" rows="5" placeholder="A few words are enough."></textarea>
+            <p class="setting-hint">Saved automatically, only on this device.</p>
+            <div class="journal-buttons">
+                <button type="button" class="secondary-button" id="journal-delete">Delete note</button>
+                <button type="submit" class="primary-button">Done</button>
+            </div>
+        </form>
+    </dialog>
     
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
