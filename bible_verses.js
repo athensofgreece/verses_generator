@@ -702,6 +702,7 @@
         const tabButtons = document.querySelectorAll('.tab-button');
         const views = {
             home: document.getElementById('view-home'),
+            journal: document.getElementById('view-journal'),
             favorites: document.getElementById('view-favorites')
         };
         
@@ -752,6 +753,9 @@
             if (actions.dataset.target === 'random') {
                 return currentVerse;
             }
+            if (actions.dataset.target === 'journal') {
+                return journal.find(entry => verseKey(entry) === actions.dataset.key);
+            }
             return favorites.find(saved => verseKey(saved) === actions.dataset.key);
         }
         
@@ -794,6 +798,7 @@
                 createActionButton('copy', 'Copy'),
                 createActionButton('share', 'Share'),
                 createActionButton('listen', '\u25B6 Listen'),
+                createActionButton('reflect', '\u270E Reflect'),
                 createActionButton('remove', 'Remove')
             );
             
@@ -828,6 +833,10 @@
             if (event.key === FAVORITES_KEY || event.key === null) {
                 favorites = loadFavorites();
                 renderFavorites();
+            }
+            if (event.key === JOURNAL_KEY || event.key === null) {
+                journal = loadJournal();
+                renderJournal();
             }
         });
         
@@ -962,6 +971,10 @@
                 shareVerse(verse);
             } else if (action === 'listen') {
                 speakVerse(verse, button);
+            } else if (action === 'reflect') {
+                openJournal(verse);
+            } else if (action === 'delete-note') {
+                deleteJournalEntry(verse);
             }
         });
         
@@ -1181,8 +1194,165 @@
         pauseStop.addEventListener('click', () => closeDialog(pauseDialog));
         pauseDialog.addEventListener('close', stopPauseTimer);
         
+        // ---- Reflection journal ----
+        const JOURNAL_KEY = 'versesGenerator.journal';
+        const journalDialog = document.getElementById('journal-dialog');
+        const journalNote = document.getElementById('journal-note');
+        const journalPrompt = document.getElementById('journal-prompt');
+        const journalDelete = document.getElementById('journal-delete');
+        const journalList = document.getElementById('journal-list');
+        const journalEmpty = document.getElementById('journal-empty');
+        const reflectionPrompts = [
+            'What is one word from this verse you want to carry today?',
+            'How does this verse speak to how you feel right now?',
+            'What is one small step this verse invites you to take?',
+            'What would change if you believed this today?',
+            'Who could you share this encouragement with?',
+            'What do you want to tell God about this?',
+            'Where do you need this verse most this week?',
+            'What feels hard to believe here, and why?'
+        ];
+        let journalVerse = null;
+        
+        function loadJournal() {
+            try {
+                const saved = JSON.parse(localStorage.getItem(JOURNAL_KEY));
+                return Array.isArray(saved)
+                    ? saved.filter(entry => entry && typeof entry.reference === 'string' && typeof entry.note === 'string')
+                    : [];
+            } catch (error) {
+                return [];
+            }
+        }
+        
+        let journal = loadJournal();
+        
+        function saveJournal() {
+            try {
+                localStorage.setItem(JOURNAL_KEY, JSON.stringify(journal));
+            } catch (error) {
+                // Storage unavailable: notes last for this visit only
+            }
+        }
+        
+        // The same verse always gets the same prompt
+        function promptFor(verse) {
+            let hash = 0;
+            for (const character of verseKey(verse)) {
+                hash = (hash * 31 + character.charCodeAt(0)) >>> 0;
+            }
+            return reflectionPrompts[hash % reflectionPrompts.length];
+        }
+        
+        function journalEntryFor(verse) {
+            return journal.find(entry => verseKey(entry) === verseKey(verse));
+        }
+        
+        function openJournal(verse) {
+            const entry = journalEntryFor(verse);
+            journalVerse = { text: verse.text, reference: verse.reference, category: verse.category };
+            document.getElementById('journal-verse-text').textContent = verse.text;
+            document.getElementById('journal-verse-reference').textContent = verse.reference;
+            journalPrompt.textContent = entry ? entry.prompt : promptFor(verse);
+            journalNote.value = entry ? entry.note : '';
+            journalDelete.hidden = !entry;
+            openDialog(journalDialog);
+            journalNote.focus();
+        }
+        
+        // Closing the dialog in any way (Done, X, Escape, backdrop) saves the note
+        function saveJournalNote() {
+            if (!journalVerse) {
+                return;
+            }
+            const verse = journalVerse;
+            const note = journalNote.value.trim();
+            journalVerse = null;
+            journal = loadJournal().filter(entry => verseKey(entry) !== verseKey(verse));
+            if (note) {
+                journal.unshift(Object.assign({}, verse, {
+                    note: note,
+                    prompt: journalPrompt.textContent,
+                    updatedAt: new Date().toISOString()
+                }));
+            }
+            saveJournal();
+            renderJournal();
+            if (note) {
+                showToast('Note saved');
+            }
+        }
+        
+        function deleteJournalEntry(verse) {
+            if (!window.confirm('Delete this note? This can\u2019t be undone.')) {
+                return false;
+            }
+            journal = loadJournal().filter(entry => verseKey(entry) !== verseKey(verse));
+            saveJournal();
+            renderJournal();
+            showToast('Note deleted');
+            return true;
+        }
+        
+        // submit and cancel fire before the dialog closes, so the note is stored right away
+        journalDialog.addEventListener('submit', saveJournalNote);
+        journalDialog.addEventListener('cancel', saveJournalNote);
+        journalDialog.addEventListener('close', saveJournalNote);
+        
+        journalDelete.addEventListener('click', () => {
+            const verse = journalVerse;
+            if (verse && deleteJournalEntry(verse)) {
+                journalVerse = null;
+                closeDialog(journalDialog);
+            }
+        });
+        
+        function createJournalItem(entry) {
+            const item = document.createElement('li');
+            item.className = 'favorite-item journal-item';
+            
+            const date = document.createElement('p');
+            date.className = 'journal-date';
+            date.textContent = new Date(entry.updatedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+            
+            const text = document.createElement('div');
+            text.className = 'verse-text';
+            text.textContent = entry.text;
+            
+            const reference = document.createElement('div');
+            reference.className = 'verse-reference';
+            reference.textContent = entry.reference;
+            
+            const prompt = document.createElement('p');
+            prompt.className = 'journal-item-prompt';
+            prompt.textContent = entry.prompt;
+            
+            const note = document.createElement('p');
+            note.className = 'journal-item-note';
+            note.textContent = entry.note;
+            
+            const actions = document.createElement('div');
+            actions.className = 'verse-actions';
+            actions.dataset.target = 'journal';
+            actions.dataset.key = verseKey(entry);
+            actions.append(
+                createActionButton('reflect', '\u270E Edit'),
+                createActionButton('listen', '\u25B6 Listen'),
+                createActionButton('delete-note', 'Delete')
+            );
+            
+            item.append(date, text, reference, prompt, note, actions);
+            return item;
+        }
+        
+        function renderJournal() {
+            journalList.replaceChildren(...journal.map(createJournalItem));
+            journalEmpty.hidden = journal.length > 0;
+        }
+        
         // Initial render
         showDailyVerse();
         scheduleDailyRefresh();
         renderFavorites();
+        renderJournal();
         generateVerse();

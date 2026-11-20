@@ -151,8 +151,7 @@ h1 {
 
 /* ---- Home / Favorites tabs ---- */
 .view-tabs {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
     gap: 4px;
     padding: 4px;
     margin-bottom: 20px;
@@ -161,6 +160,8 @@ h1 {
 }
 
 .tab-button {
+    flex: 1 1 0;
+    min-width: 0;
     min-height: 44px;
     padding: 8px;
     border-radius: 9px;
@@ -583,6 +584,83 @@ h1 {
     background-color: var(--accent-hover);
 }
 
+/* ---- Journal ---- */
+.journal-verse {
+    padding: 14px;
+    border-radius: var(--radius-small);
+    background-color: var(--surface-muted);
+}
+
+.journal-verse .verse-text {
+    font-size: 1.0625rem;
+}
+
+.journal-prompt,
+.journal-item-prompt {
+    font-weight: 600;
+    color: var(--label);
+}
+
+.journal-note {
+    width: 100%;
+    min-height: 120px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-small);
+    background-color: var(--surface);
+    color: var(--text);
+    font: inherit;
+    line-height: 1.6;
+    resize: vertical;
+}
+
+.journal-note:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+}
+
+.journal-note + .setting-hint {
+    margin-top: -10px;
+}
+
+.journal-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.secondary-button {
+    min-height: 48px;
+    padding: 10px 18px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-small);
+    background-color: var(--surface);
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.secondary-button:hover {
+    background-color: var(--chip);
+}
+
+.journal-date {
+    margin: 0 0 6px;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.journal-item-prompt {
+    margin: 12px 0 4px;
+    font-size: 0.9375rem;
+}
+
+.journal-item-note {
+    margin: 0;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+}
+
 /* ---- Toast ---- */
 .toast {
     position: fixed;
@@ -612,6 +690,16 @@ h1 {
     html[data-text-size="large"] .mood-grid,
     html[data-text-size="xlarge"] .mood-grid {
         grid-template-columns: 1fr;
+    }
+
+    html[data-text-size="large"] .view-tabs,
+    html[data-text-size="xlarge"] .view-tabs {
+        flex-wrap: wrap;
+    }
+
+    html[data-text-size="large"] .tab-button,
+    html[data-text-size="xlarge"] .tab-button {
+        flex: 1 1 auto;
     }
 }
 

@@ -46,6 +46,7 @@
         
         <nav class="view-tabs" aria-label="Views">
             <button type="button" class="tab-button active" id="tab-home" data-view="home" aria-pressed="true">Home</button>
+            <button type="button" class="tab-button" id="tab-journal" data-view="journal" aria-pressed="false">Journal</button>
             <button type="button" class="tab-button" id="tab-favorites" data-view="favorites" aria-pressed="false">Favorites (<span id="favorites-count">0</span>)</button>
         </nav>
         
@@ -63,6 +64,7 @@
                         <button type="button" class="action-button" data-action="copy">Copy</button>
                         <button type="button" class="action-button" data-action="share">Share</button>
                         <button type="button" class="action-button" data-action="listen" aria-pressed="false">&#9654; Listen</button>
+                        <button type="button" class="action-button" data-action="reflect">&#9998; Reflect</button>
                     </div>
                 </section>
             </div>
@@ -90,6 +92,7 @@
                         <button type="button" class="action-button" data-action="copy">Copy</button>
                         <button type="button" class="action-button" data-action="share">Share</button>
                         <button type="button" class="action-button" data-action="listen" aria-pressed="false">&#9654; Listen</button>
+                        <button type="button" class="action-button" data-action="reflect">&#9998; Reflect</button>
                     </div>
                 </div>
                 
@@ -106,6 +109,11 @@
                 </section>
             </div>
         </main>
+        
+        <section id="view-journal" aria-label="Journal" hidden>
+            <p class="favorites-empty" id="journal-empty">No reflections yet. Tap &#9998; Reflect on any verse to write a few words.</p>
+            <ul class="favorites-list" id="journal-list"></ul>
+        </section>
         
         <section id="view-favorites" aria-label="Favorite verses" hidden>
             <p class="favorites-empty" id="favorites-empty">No favorites yet. Tap &#9734; Save on any verse to keep it here.</p>
@@ -151,6 +159,26 @@
             <div class="pause-timer" id="pause-timer" role="timer" aria-label="Time left">1:00</div>
             <button type="button" class="primary-button" id="pause-stop">End pause</button>
         </div>
+    </dialog>
+    
+    <dialog class="sheet" id="journal-dialog" aria-labelledby="journal-title">
+        <form method="dialog" class="sheet-body">
+            <div class="sheet-header">
+                <h2 id="journal-title">Reflect</h2>
+                <button type="submit" class="icon-button" aria-label="Save and close" title="Save and close">&times;</button>
+            </div>
+            <div class="journal-verse">
+                <div class="verse-text" id="journal-verse-text"></div>
+                <div class="verse-reference" id="journal-verse-reference"></div>
+            </div>
+            <label class="journal-prompt" for="journal-note" id="journal-prompt"></label>
+            <textarea class="journal-note" id="journal-note" rows="5" placeholder="A few words are enough."></textarea>
+            <p class="setting-hint">Saved automatically, only on this device.</p>
+            <div class="journal-buttons">
+                <button type="button" class="secondary-button" id="journal-delete">Delete note</button>
+                <button type="submit" class="primary-button">Done</button>
+            </div>
+        </form>
     </dialog>
     
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
