@@ -94,6 +94,16 @@
                 </div>
                 
                 <button type="button" id="generate-button">New Verse</button>
+                
+                <section class="pause-card" aria-labelledby="pause-heading">
+                    <h2 id="pause-heading" class="section-title">Take a breathing pause</h2>
+                    <p class="pause-hint">Breathe slowly with the verse above.</p>
+                    <div class="pause-options" role="group" aria-labelledby="pause-heading">
+                        <button type="button" class="pause-option" data-minutes="1">1 min</button>
+                        <button type="button" class="pause-option" data-minutes="3">3 min</button>
+                        <button type="button" class="pause-option" data-minutes="5">5 min</button>
+                    </div>
+                </section>
             </div>
         </main>
         
@@ -129,6 +139,18 @@
             <div class="settings-preview verse-text">The LORD is my shepherd; I shall not want.</div>
             <button type="submit" class="primary-button">Done</button>
         </form>
+    </dialog>
+    
+    <dialog class="sheet pause-sheet" id="pause-dialog" aria-labelledby="pause-title">
+        <div class="sheet-body pause-body">
+            <h2 id="pause-title" class="daily-label">Breathing pause</h2>
+            <div class="breath-circle" aria-hidden="true"></div>
+            <p class="breath-cue" id="breath-cue">Breathe in</p>
+            <div class="verse-text" id="pause-text"></div>
+            <div class="verse-reference" id="pause-reference"></div>
+            <div class="pause-timer" id="pause-timer" role="timer" aria-label="Time left">1:00</div>
+            <button type="button" class="primary-button" id="pause-stop">End pause</button>
+        </div>
     </dialog>
     
     <div class="toast" id="toast" role="status" aria-live="polite"></div>

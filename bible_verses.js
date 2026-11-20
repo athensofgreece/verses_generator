@@ -1097,6 +1097,90 @@
         
         applyReadingSettings();
         
+        // ---- Breathing pause ----
+        const BREATH_IN_SECONDS = 4;
+        const BREATH_CYCLE_SECONDS = 10;
+        const pauseDialog = document.getElementById('pause-dialog');
+        const pauseTimer = document.getElementById('pause-timer');
+        const breathCue = document.getElementById('breath-cue');
+        const pauseStop = document.getElementById('pause-stop');
+        let pauseInterval = null;
+        let pauseEndsAt = 0;
+        let pauseStartedAt = 0;
+        let wakeLock = null;
+        
+        function formatSeconds(totalSeconds) {
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            return minutes + ':' + String(seconds).padStart(2, '0');
+        }
+        
+        // Keep the screen on during a pause where supported
+        async function keepScreenOn() {
+            try {
+                if (navigator.wakeLock) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                }
+            } catch (error) {
+                wakeLock = null;
+            }
+        }
+        
+        function releaseScreen() {
+            if (wakeLock) {
+                wakeLock.release().catch(() => {});
+                wakeLock = null;
+            }
+        }
+        
+        function stopPauseTimer() {
+            clearInterval(pauseInterval);
+            pauseInterval = null;
+            releaseScreen();
+        }
+        
+        function finishPause() {
+            stopPauseTimer();
+            pauseTimer.textContent = formatSeconds(0);
+            breathCue.textContent = 'Well done. Take this peace with you.';
+            pauseDialog.classList.add('finished');
+            pauseStop.textContent = 'Close';
+        }
+        
+        function updatePause() {
+            const now = Date.now();
+            const left = Math.max(0, Math.ceil((pauseEndsAt - now) / 1000));
+            pauseTimer.textContent = formatSeconds(left);
+            if (left === 0) {
+                finishPause();
+                return;
+            }
+            const elapsed = ((now - pauseStartedAt) / 1000) % BREATH_CYCLE_SECONDS;
+            breathCue.textContent = elapsed < BREATH_IN_SECONDS ? 'Breathe in' : 'Breathe out';
+        }
+        
+        function startPause(minutes) {
+            const verse = currentVerse || dailyVerse;
+            document.getElementById('pause-text').textContent = verse.text;
+            document.getElementById('pause-reference').textContent = verse.reference;
+            pauseDialog.classList.remove('finished');
+            pauseStop.textContent = 'End pause';
+            pauseStartedAt = Date.now();
+            pauseEndsAt = pauseStartedAt + minutes * 60000;
+            stopPauseTimer();
+            updatePause();
+            pauseInterval = setInterval(updatePause, 250);
+            keepScreenOn();
+            openDialog(pauseDialog);
+        }
+        
+        document.querySelectorAll('.pause-option').forEach(button => {
+            button.addEventListener('click', () => startPause(Number(button.dataset.minutes)));
+        });
+        
+        pauseStop.addEventListener('click', () => closeDialog(pauseDialog));
+        pauseDialog.addEventListener('close', stopPauseTimer);
+        
         // Initial render
         showDailyVerse();
         scheduleDailyRefresh();

@@ -359,6 +359,91 @@ h1 {
     background-color: var(--accent-hover);
 }
 
+/* ---- Breathing pause ---- */
+.pause-card {
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid var(--surface-muted);
+    text-align: center;
+}
+
+.pause-card .section-title {
+    margin-bottom: 4px;
+}
+
+.pause-hint {
+    margin: 0 0 12px;
+    font-size: 0.9375rem;
+    color: var(--text-muted);
+}
+
+.pause-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.pause-option {
+    min-height: var(--tap);
+    border-radius: var(--radius-small);
+    background-color: var(--chip);
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.pause-option:hover {
+    background-color: var(--chip-hover);
+}
+
+.pause-sheet {
+    width: min(640px, calc(100% - 24px));
+}
+
+.pause-body {
+    justify-items: center;
+    padding: 28px 22px;
+    text-align: center;
+}
+
+.pause-body .verse-reference {
+    margin-top: -10px;
+    text-align: center;
+}
+
+.breath-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--accent) 0%, var(--surface-muted) 70%);
+    opacity: 0.85;
+    animation: breathe 10s ease-in-out infinite;
+}
+
+/* 4 seconds in, 6 seconds out (matches the cue text) */
+@keyframes breathe {
+    0%,
+    100% {
+        transform: scale(0.6);
+    }
+    40% {
+        transform: scale(1);
+    }
+}
+
+.breath-cue {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--label);
+}
+
+.pause-timer {
+    font-size: 1.5rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+}
+
 /* ---- Favorites view ---- */
 .favorites-list {
     display: grid;
